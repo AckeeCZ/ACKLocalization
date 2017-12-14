@@ -11,5 +11,17 @@ struct LocRow {
     let key: String
     let value: String
     
-    var localizableRow: String { return "\"" + key + "\" = \"" + value + "\";" } 
+    var localizableRow: String { return "\"" + key + "\" = \"" + normalizedValue + "\";" }
+    
+    private var normalizedValue: String {
+        return value
+            .replacingOccurrences(of: "\"", with: "\\\"")
+            .replacingOccurrences(of: "\n", with: "\\n")
+            .replacingOccurrences(of: "%s", with: "%@")
+            .replacingOccurrences(of: "%", with: "%%")
+            .replacingOccurrences(of: "%%@", with: "%@")
+            .replacingOccurrences(of: "%%d", with: "%d")
+            .replacingOccurrences(of: "%%s", with: "%s")
+            .replacingOccurrences(of: "%%f", with: "%f")
+    }
 }
