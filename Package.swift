@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "Localization",
+    name: "ACKLocalization",
     dependencies: [
         .package(url: "https://github.com/kylef/Commander.git", from: "0.8.0"),
         .package(url: "https://github.com/yaslab/CSV.swift.git", from: "2.1.0")
