@@ -16,7 +16,7 @@ Localize your app from Google Spreadsheet using swift tool.
   s.homepage         = 'https://gitlab.ack.ee/iOS/localization'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Ackee' => 'info@ackee.cz' }
-  s.source           = { http: "https://gitlab.ack.ee/iOS/ACKLocalization/uploads/138ca2056b7d4fb7e2b0fb36193b2f67/Localization.zip" }
-  s.preserve_paths = '*'
-  s.exclude_files = '**/file.zip'
+  s.source           = { http: "https://github.com/AckeeCZ/ACKLocalization/download/#{s.version}/acklocalization-#{s.version}.zip" }
+  s.preserve_paths   = '*'
+  s.exclude_files    = '**/file.zip'
 end
