@@ -26,7 +26,7 @@ public final class Localization {
         { gdocID, lockKeyName, langMappingJSONString, outputDir, fileName in
             let langMapping = try JSONSerialization.jsonObject(with: langMappingJSONString.data(using: .utf8)!, options: .allowFragments) as! [String: String]
             
-            let url = URL(string: "https://docs.google.com/spreadsheets/d/e/" + gdocID + "/pub?output=tsv")!
+            let url = URL(string: "https://docs.google.com/spreadsheets/d/e/2PACX-" + gdocID + "/pub?output=tsv")!
             let csvString = try String(contentsOf: url)
             let csv = try CSVReader(string: csvString, hasHeaderRow: true, trimFields: true, delimiter: "\t")
             let headerRow = csv.headerRow?.map { langMapping[$0] ?? $0 } ?? []
