@@ -17,6 +17,7 @@ struct LocRow {
         return value
             .replacingOccurrences(of: "\"", with: "\\\"")
             .replacingOccurrences(of: "\n", with: "\\n")
+            .replacingOccurrences(of: "\\u", with: "\\U")
             .replacingOccurrences(of: "%s", with: "%@")
             .replacingOccurrences(of: "%", with: "%%")
             .replacingOccurrences(of: "%%@", with: "%@")
