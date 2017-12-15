@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'ACKLocalization'
-  s.version          = '0.2.0'
+  s.version          = '0.2.1'
   s.summary          = 'Localize app from Google Spreadsheet'
 
 # This description is used to generate tags and improve search results.
@@ -18,4 +18,5 @@ Localize your app from Google Spreadsheet using swift tool.
   s.author           = { 'Ackee' => 'info@ackee.cz' }
   s.source           = { http: "https://github.com/AckeeCZ/ACKLocalization/releases/download/#{s.version}/acklocalization-#{s.version}.zip" }
   s.preserve_paths   = '*'
+  s.exclude_files    = '**/file.zip'
 end
