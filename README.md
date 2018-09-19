@@ -1,6 +1,6 @@
 ![ackee|ACKLocalization](Resources/logo.png)
 
-<!-- [![CI Status](http://img.shields.io/travis/AckeeCZ/ACKLocalization.svg?style=flat)](https://travis-ci.com/AckeeCZ/ACKLocalization) -->
+[![Build Status](https://travis-ci.com/AckeeCZ/ACKLocalization.svg?branch=master)](https://travis-ci.com/AckeeCZ/ACKLocalization)
 [![Version](https://img.shields.io/cocoapods/v/ACKLocalization.svg?style=flat)](http://cocoapods.org/pods/ACKLocalization)
 [![License](https://img.shields.io/cocoapods/l/ACKLocalization.svg?style=flat)](http://cocoapods.org/pods/ACKLocalization)
 
