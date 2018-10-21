@@ -21,6 +21,12 @@ let package = Package(
             dependencies: [
                 "Commander",
                 "CSV"
-            ])
+            ]),
+        .testTarget(
+            name: "LocalizationCoreTests",
+            dependencies: [
+                "LocalizationCore"
+            ]
+        )
     ]
 )
