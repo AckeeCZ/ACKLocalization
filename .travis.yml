@@ -1,4 +1,5 @@
 language: objective-c
 osx_image: xcode10
 script:
+- swift test
 - swift build
