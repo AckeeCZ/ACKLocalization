@@ -47,10 +47,10 @@ public final class Localization {
             
             try values.forEach { key, values in
                 let outputArray = values.map { $0.localizableRow }
-                let output = outputArray.filter { !$0.contains("plist.") }.joined(separator: "\n")
+                let output = outputArray.filter { !$0.contains(Constants.plistPrefix + ".") }.joined(separator: "\n")
                 var plistOutputs: [String: String] = [:]
 
-                let plistFullStrings = outputArray.filter { $0.contains("plist.") }.map { $0.components(separatedBy: ".").dropFirst().joined(separator: ".") }
+                let plistFullStrings = outputArray.filter { $0.contains(Constants.plistPrefix + ".") }.map { $0.components(separatedBy: ".").dropFirst().joined(separator: ".") }
                 plistFullStrings.forEach {
                     var components = $0.components(separatedBy: ".")
                     let plistName = components.remove(at: components.startIndex) + ".strings"
