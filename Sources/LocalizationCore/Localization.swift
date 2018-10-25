@@ -61,14 +61,10 @@ public final class Localization {
                     }
                 }
 
-                do {
-                    try self.writeOutput(output, fileName: fileName, outputDir: outputDir, key: key)
-                } catch {
-                    throw LocalizationError.unableToWrite
-                }
+                try self.writeOutput(output, fileName: fileName, outputDir: outputDir, key: key)
 
                 for (plistName, output) in plistOutputs {
-                    try? self.writeOutput(output, fileName: plistName, outputDir: outputDir, key: key)
+                    try self.writeOutput(output, fileName: plistName, outputDir: outputDir, key: key)
                 }
             }
         }
