@@ -75,6 +75,8 @@ This is example structure of the spreadsheet with translations
 |---------|-------|------|
 | hello   | Hello | Ahoj |
 
+ACKLocalization also now supports plist files. Simply prefix the key with plist.NameOfPlist - please note that NameOfPlist is case-sensitive.
+
 #### Example call
 
 This is the example call of **ACKLocalization**

@@ -46,21 +46,43 @@ public final class Localization {
             }
             
             try values.forEach { key, values in
-                let output = values.map { $0.localizableRow }.joined(separator: "\n")
-                let dir = NSString(string: outputDir).expandingTildeInPath + "/" + key + ".lproj"
-                let file = dir + "/" + fileName
-                
-                try? FileManager.default.removeItem(atPath: file)
-                try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true, attributes: nil)
-                
-                do {
-                    try output.write(toFile: file, atomically: true, encoding: .utf8)
-                } catch {
-                    throw LocalizationError.unableToWrite
+                let outputArray = values.map { $0.localizableRow }
+                let output = outputArray.filter { !$0.contains(Constants.plistPrefix + ".") }.joined(separator: "\n")
+                var plistOutputs: [String: String] = [:]
+
+                let plistFullStrings = outputArray.filter { $0.contains(Constants.plistPrefix + ".") }.map { $0.components(separatedBy: ".").dropFirst().joined(separator: ".") }
+                plistFullStrings.forEach {
+                    var components = $0.components(separatedBy: ".")
+                    let plistName = components.remove(at: components.startIndex) + ".strings"
+                    if var plist = plistOutputs[plistName] {
+                        plist += components.joined(separator: ".") + "\n"
+                    } else {
+                        plistOutputs[plistName] = components.joined(separator: ".") + "\n"
+                    }
+                }
+
+                try self.writeOutput(output, fileName: fileName, outputDir: outputDir, key: key)
+
+                for (plistName, output) in plistOutputs {
+                    try self.writeOutput(output, fileName: plistName, outputDir: outputDir, key: key)
                 }
             }
         }
         
         try main.run(Array(arguments.suffix(from: 1)))
+    }
+
+    private func writeOutput(_ output: String, fileName: String, outputDir: String, key: String) throws {
+        let dir = NSString(string: outputDir).expandingTildeInPath + "/" + key + ".lproj"
+        let file = dir + "/" + fileName
+
+        try? FileManager.default.removeItem(atPath: file)
+        try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true, attributes: nil)
+
+        do {
+            try output.write(toFile: file, atomically: true, encoding: .utf8)
+        } catch {
+            throw LocalizationError.unableToWrite
+        }
     }
 }
