@@ -3,3 +3,17 @@ osx_image: xcode10.1
 script:
 - swift test
 - swift build
+before_deploy:
+- swift build --static-swift-stdlib --configuration release
+- export BINARY_PATH=`swift build --show-bin-path --configuration release`/Localization
+- mv "$BINARY_PATH" .
+- zip -r acklocalization-$TRAVIS_TAG.zip LICENSE Localization
+deploy:
+  provider: releases
+  api_key:
+    secure: mautv0nbfxImQ/xkOkQYnosWbkUmT6UsKeY1FzeG1m8D9SvdosHfDqHsiw7t7hSZa5WIpbHa6BEHARosNQNnj2171x/WI1ahR8U6gU1n2Pc6ekS+Yi0mvgFrIexyUds+tvjZCYpXl80xICIEF1zEXvROX8ag+WsfUyobk40W+4r1rr/iKIYHhJFFLM2QKv8ItpG3vqKxgBn+t/z0OxB02RpW7k7xqfXieRDX6m9jAEHfT0595pjZXquJmp8pXq/rxjzpiVw15QoZBQCS97gRzaXrLsOVtGD4HkKq3Ihc2XPixdwptK++kP6euEH9smR3eTnidYVpb9OqIK+hoQaJ79uTmShULgG4/KEcU7sB5AB+sOoEeJoBTZqYuEV/1Q8P4paw0u9YequfexMj4QCYx1TbpeQU6I78ssan6J9fkj96gfBpWgnfq/WmlDLiZ/Ilzsvfwqwa+bS2Q6ePDOZfzvLS9x7pw1hF/Yk28k0keuhF3Fw1jIw3MLXTe6WQepUw4rGIahK/bwLAPeKezbonhUGsHqMlwk6HQ0s01G7Gohj/wLLT/RJmt86RKvNhzlByOdmMwMuf0GDO0pn7lMTQqQcAaWR2Fh79OoSMGejE2LwOD+iDGgwv2k6xoAzW65XG/V7LQn0m61zkIszQwD518GPCx0d+VK46rLGQx1bqwQw=
+  file: acklocalization-$TRAVIS_TAG.zip
+  skip_cleanup: true
+  on:
+    repo: AckeeCZ/ACKLocalization
+    tags: true
