@@ -18,5 +18,4 @@ Localize your app from Google Spreadsheet using swift tool.
   s.author           = { 'Ackee' => 'info@ackee.cz' }
   s.source           = { http: "https://github.com/AckeeCZ/ACKLocalization/releases/download/#{s.version}/acklocalization-#{s.version}.zip" }
   s.preserve_paths   = '*'
-  s.exclude_files    = '**/file.zip'
 end

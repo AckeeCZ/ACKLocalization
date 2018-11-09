@@ -3,13 +3,14 @@ osx_image: xcode10.1
 script:
 - swift test
 - swift build
+- pod lib lint --skip-import-validation --skip-tests --allow-warnings
 before_deploy:
 - swift build --static-swift-stdlib --configuration release
 - export BINARY_PATH=`swift build --show-bin-path --configuration release`/Localization
 - mv "$BINARY_PATH" .
 - zip -r acklocalization-$TRAVIS_TAG.zip LICENSE Localization
 after_deploy:
-- pod trunk push
+- pod trunk push --skip-import-validation --skip-tests --allow-warnings
 deploy:
   provider: releases
   api_key:
