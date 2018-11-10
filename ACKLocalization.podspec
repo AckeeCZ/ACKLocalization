@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
 Localize your app from Google Spreadsheet using swift tool.
                        DESC
 
-  s.homepage         = 'https://gitlab.ack.ee/iOS/localization'
+  s.homepage         = 'https://github.com/AckeeCZ/ACKLocalization'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Ackee' => 'info@ackee.cz' }
   s.source           = { http: "https://github.com/AckeeCZ/ACKLocalization/releases/download/#{s.version}/acklocalization-#{s.version}.zip" }
