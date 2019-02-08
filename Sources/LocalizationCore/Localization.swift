@@ -44,20 +44,19 @@ public final class Localization {
                     values[langKey] = langValues + [LocRow(key: locKeyValue, value: value)]
                 }
             }
-            
             try values.forEach { key, values in
                 let outputArray = values.map { $0.localizableRow }
                 let output = outputArray.filter { !$0.contains(Constants.plistPrefix + ".") }.joined(separator: "\n")
                 var plistOutputs: [String: String] = [:]
-
                 let plistFullStrings = outputArray.filter { $0.contains(Constants.plistPrefix + ".") }.map { $0.components(separatedBy: ".").dropFirst().joined(separator: ".") }
                 plistFullStrings.forEach {
                     var components = $0.components(separatedBy: ".")
                     let plistName = components.remove(at: components.startIndex) + ".strings"
-                    if var plist = plistOutputs[plistName] {
-                        plist += components.joined(separator: ".") + "\n"
+                    let plistOutput = "\"" + components.joined(separator: ".")
+                    if let current = plistOutputs[plistName] {
+                        plistOutputs[plistName] = current + plistOutput + "\n"
                     } else {
-                        plistOutputs[plistName] = components.joined(separator: ".") + "\n"
+                        plistOutputs[plistName] = plistOutput + "\n"
                     }
                 }
 
