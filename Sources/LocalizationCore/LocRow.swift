@@ -24,7 +24,7 @@ struct LocRow {
             .replacingOccurrences(of: "%%d", with: "%d")
             .replacingOccurrences(of: "%%s", with: "%s")
             .replacingOccurrences(of: "%%f", with: "%f")
-            .replacingOccurrences(of: "%%i", with: "%d")
+            .replacingOccurrences(of: "%%i", with: "%i")
             .replacingPositionedArgs(separator: " ")
             .replacingPositionedArgs(separator: "\n")
     }

@@ -14,7 +14,7 @@ final class LocRowTests: XCTestCase {
     
     func testAlternativeIntegerRow() {
         let locRow = LocRow(key: "int_key", value: "int value %i")
-        XCTAssertEqual("\"int_key\" = \"int value %d\";", locRow.localizableRow)
+        XCTAssertEqual("\"int_key\" = \"int value %i\";", locRow.localizableRow)
     }
     
     func testFloatRow() {
