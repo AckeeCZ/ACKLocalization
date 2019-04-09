@@ -8,6 +8,9 @@
 
 ## master
 
+- add `%i` to known format specifiers (#12, kudos to @olejnjak)
+- migrate to Swift 5 (#12, kudos to @olejnjak)
+
 ## 0.3.0
 
 - implement positioned arguments (#6, kudos to @fortmarek)

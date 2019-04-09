@@ -31,7 +31,7 @@ public final class Localization {
             let csv = try CSVReader(string: csvString, hasHeaderRow: true, trimFields: true, delimiter: "\t")
             let headerRow = csv.headerRow?.map { langMapping[$0] ?? $0 } ?? []
             
-            guard let locKeyIndex = headerRow.index(of: lockKeyName) else { throw LocalizationError.missingKey(lockKeyName) }
+            guard let locKeyIndex = headerRow.firstIndex(of: lockKeyName) else { throw LocalizationError.missingKey(lockKeyName) }
             
             var values: [String: [LocRow]] = headerRow.filter { langMapping.values.contains($0) }.reduce([:]) { $0 + [$1: []] }
             

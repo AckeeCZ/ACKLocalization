@@ -12,6 +12,11 @@ final class LocRowTests: XCTestCase {
         XCTAssertEqual("\"int_key\" = \"int value %d\";", locRow.localizableRow)
     }
     
+    func testAlternativeIntegerRow() {
+        let locRow = LocRow(key: "int_key", value: "int value %i")
+        XCTAssertEqual("\"int_key\" = \"int value %i\";", locRow.localizableRow)
+    }
+    
     func testFloatRow() {
         let locRow = LocRow(key: "float_key", value: "float value %f")
         XCTAssertEqual("\"float_key\" = \"float value %f\";", locRow.localizableRow)
