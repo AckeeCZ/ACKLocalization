@@ -7,21 +7,21 @@
 
 import Foundation
 
-struct AccessToken: Decodable {
+public struct AccessToken: Decodable {
     enum CodingKeys: String, CodingKey {
         case accessToken = "access_token"
         case expiration = "expires_in"
         case type = "token_type"
     }
     
-    let accessToken: String
-    let expiration: TimeInterval
-    let type: String
+    public let accessToken: String
+    public let expiration: TimeInterval
+    public let type: String
     
-    var headerValue: String { type + " " + accessToken }
+    public var headerValue: String { type + " " + accessToken }
 }
 
-struct AccessTokenRequest: Encodable {
+internal struct AccessTokenRequest: Encodable {
     enum CodingKeys: String, CodingKey {
         case assertion
         case grantType = "grant_type"

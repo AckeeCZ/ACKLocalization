@@ -7,6 +7,6 @@
 
 import Foundation
 
-struct RequestError: Error {
-    let underlyingError: Error
+public struct RequestError: Error {
+    public let underlyingError: Error
 }

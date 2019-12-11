@@ -7,23 +7,24 @@
 
 import Combine
 import Foundation
+import SwiftJWT
 
-protocol AuthAPIServicing {
+public protocol AuthAPIServicing {
     func fetchAccessToken(serviceAccount: ServiceAccount) -> AnyPublisher<AccessToken, RequestError>
 }
 
-struct AuthAPIService: AuthAPIServicing {
+public struct AuthAPIService: AuthAPIServicing {
     private let session: URLSession
     
     // MARK: - Initializers
     
-    init(session: URLSession = .shared) {
+    public init(session: URLSession = .shared) {
         self.session = session
     }
     
     // MARK: - API calls
     
-    func fetchAccessToken(serviceAccount: ServiceAccount) -> AnyPublisher<AccessToken, RequestError> {
+    public func fetchAccessToken(serviceAccount: ServiceAccount) -> AnyPublisher<AccessToken, RequestError> {
         let jwt = self.jwt(for: serviceAccount)
         let url = URL(string: "https://oauth2.googleapis.com/token")!
         let requestData = AccessTokenRequest(assertion: jwt)
@@ -42,6 +43,11 @@ struct AuthAPIService: AuthAPIServicing {
     // MARK: - Private helpers
     
     private func jwt(for serviceAccount: ServiceAccount) -> String {
-        ""
+        let header = Header(typ: "JWT")
+        let now = Int(Date().timeIntervalSince1970)
+        let claims = GoogleClaims(iss: serviceAccount.clientEmail, exp: now + 60, iat: now)
+        var jwt = JWT(header: header, claims: claims)
+        let signer = JWTSigner.rs256(privateKey: serviceAccount.privateKey.data(using: .utf8)!)
+        return (try? jwt.sign(using: signer)) ?? ""
     }
 }

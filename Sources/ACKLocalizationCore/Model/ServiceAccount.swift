@@ -15,8 +15,15 @@ public struct ServiceAccount: Decodable {
     }
     
     /// Email associated with the service account
-    let clientEmail: String
+    public let clientEmail: String
     
     /// Private key used to generate JWT token
-    let privateKey: String
+    public let privateKey: String
+    
+    // MARK: - Initializers
+    
+    public init(clientEmail: String, privateKey: String) {
+        self.clientEmail = clientEmail
+        self.privateKey = privateKey
+    }
 }
