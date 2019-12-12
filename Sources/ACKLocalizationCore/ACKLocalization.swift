@@ -68,12 +68,12 @@ public final class ACKLocalization {
     /// If not `spreadsheetTabName` is provided, the first in the spreadsheet is used
     public func fetchSheetValues(_ spreadsheetTabName: String?, spreadsheetId: String, serviceAccount: ServiceAccount) -> AnyPublisher<ValueRange, LocalizationError> {
         let sheetsAPI = self.sheetsAPI
-        var accessToken: AccessToken?
         
         return authAPI.fetchAccessToken(serviceAccount: serviceAccount)
-            .handleEvents(receiveOutput: { accessToken = $0 })
-            .flatMap { sheetsAPI.fetchSpreadsheet(spreadsheetId, accessToken: $0) }
-            .flatMap { sheetsAPI.fetchSheet(spreadsheetTabName, from: $0, accessToken: accessToken!) }
+            .handleEvents(receiveOutput: { sheetsAPI.accessToken = $0 })
+            .map { _ in }
+            .flatMap { sheetsAPI.fetchSpreadsheet(spreadsheetId) }
+            .flatMap { sheetsAPI.fetchSheet(spreadsheetTabName, from: $0) }
             .mapError(LocalizationError.init)
             .eraseToAnyPublisher()
     }

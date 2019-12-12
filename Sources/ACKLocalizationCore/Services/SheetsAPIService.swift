@@ -8,26 +8,31 @@
 import Combine
 import Foundation
 
-public protocol SheetsAPIServicing {
-    func fetchSpreadsheet(_ identifier: String, accessToken: AccessToken) -> AnyPublisher<Spreadsheet, RequestError>
-    func fetchSheet(_ sheetName: String?, from spreadsheet: Spreadsheet, accessToken: AccessToken) -> AnyPublisher<ValueRange, RequestError>
+public protocol SheetsAPIServicing: AnyObject {
+    var accessToken: AccessToken? { get set }
+    
+    func fetchSpreadsheet(_ identifier: String) -> AnyPublisher<Spreadsheet, RequestError>
+    func fetchSheet(_ sheetName: String?, from spreadsheet: Spreadsheet) -> AnyPublisher<ValueRange, RequestError>
 }
 
-public struct SheetsAPIService: SheetsAPIServicing {
+public final class SheetsAPIService: SheetsAPIServicing {
+    public var accessToken: AccessToken?
+    
     private let session: URLSession
     
     // MARK: - Initializers
     
-    public init(session: URLSession = .shared) {
+    public init(session: URLSession = .shared, accessToken: AccessToken? = nil) {
         self.session = session
+        self.accessToken = accessToken
     }
     
     // MARK: - API calls
     
-    public func fetchSpreadsheet(_ identifier: String, accessToken: AccessToken) -> AnyPublisher<Spreadsheet, RequestError> {
+    public func fetchSpreadsheet(_ identifier: String) -> AnyPublisher<Spreadsheet, RequestError> {
         let url = URL(string: "https://sheets.googleapis.com/v4/spreadsheets/" + identifier)!
         var request = URLRequest(url: url)
-        request.addValue(accessToken.headerValue, forHTTPHeaderField: "Authorization")
+        request.addValue(accessToken?.headerValue ?? "", forHTTPHeaderField: "Authorization")
         
         return session.dataTaskPublisher(for: request)
             .map(\.data)
@@ -36,12 +41,12 @@ public struct SheetsAPIService: SheetsAPIServicing {
             .eraseToAnyPublisher()
     }
     
-    public func fetchSheet(_ sheetName: String?, from spreadsheet: Spreadsheet, accessToken: AccessToken) -> AnyPublisher<ValueRange, RequestError> {
+    public func fetchSheet(_ sheetName: String?, from spreadsheet: Spreadsheet) -> AnyPublisher<ValueRange, RequestError> {
         let sheetName = sheetName ?? spreadsheet.sheets.first?.properties.title ?? ""
         var urlComponents = URLComponents(string: "https://sheets.googleapis.com/v4/spreadsheets/" + spreadsheet.spreadsheetId + "/values/" + sheetName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)!
         urlComponents.queryItems = [URLQueryItem(name: "valueRenderOption", value: "UNFORMATTED_VALUE")]
         var request = URLRequest(url: urlComponents.url!)
-        request.addValue(accessToken.headerValue, forHTTPHeaderField: "Authorization")
+        request.addValue(accessToken?.headerValue ?? "", forHTTPHeaderField: "Authorization")
         
         return session.dataTaskPublisher(for: request)
             .map(\.data)

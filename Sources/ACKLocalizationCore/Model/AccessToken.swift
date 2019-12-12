@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Struct holding response of auth token request
 public struct AccessToken: Decodable {
     enum CodingKeys: String, CodingKey {
         case accessToken = "access_token"
@@ -18,6 +19,7 @@ public struct AccessToken: Decodable {
     public let expiration: TimeInterval
     public let type: String
     
+    /// Value that can be used in HTTP request header
     public var headerValue: String { type + " " + accessToken }
 }
 
