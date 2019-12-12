@@ -7,12 +7,18 @@
 
 import Foundation
 
+/// Struct representing single `Localizable.strings` row
 public struct LocRow {
+    /// Key of current row
     public let key: String
+    
+    /// Original value from spreadsheet
     public let value: String
     
+    /// Representation that can be used as row in strings file
     public var localizableRow: String { return "\"" + key + "\" = \"" + normalizedValue + "\";" }
     
+    /// Value with replaced placeholder arguments
     private var normalizedValue: String {
         return value
             .replacingOccurrences(of: "\"", with: "\\\"")
@@ -31,6 +37,7 @@ public struct LocRow {
 }
 
 private extension String {
+    /// Replaces positioned arguments by given separator
     func replacingPositionedArgs(separator: String) -> String {
         return components(separatedBy: separator)
         .map {
