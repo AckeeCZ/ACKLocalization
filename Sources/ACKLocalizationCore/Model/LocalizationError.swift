@@ -7,11 +7,14 @@
 
 import Foundation
 
+/// Error that is thrown throughout the whole tool
 public struct LocalizationError: Error {
+    /// Descriptive message of error
     public let message: String
 }
 
 extension LocalizationError {
+    /// Creates `LocalizationError` from `RequestError`
     init(_ error: RequestError) {
         message = error.localizedDescription
     }
