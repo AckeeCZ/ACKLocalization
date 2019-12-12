@@ -36,15 +36,13 @@ public final class ACKLocalization {
                 .flatMap { [weak self] in self?.saveMappedValuesPublisher($0, config: config) ?? Fail(error: LocalizationError(message: "Unable to save mapped values")).eraseToAnyPublisher() }
                 .sink(receiveCompletion: { [weak self] result in
                     switch result {
-                    case .failure(let error): self?.displayError(error)
-                    case .finished:
-                        print("succes")
-                        break
+                    case .failure(let error):
+                        self?.displayError(error)
+                        exit(1)
+                    case .finished: self?.displaySuccess()
                     }
                     dispatchGroup.leave()
-                }) { _ in
-                    
-            }
+                }) { _ in }
         } catch {
           switch error {
             case let localizationError as LocalizationError:
@@ -52,6 +50,7 @@ public final class ACKLocalization {
             default:
                 print(error)
             }
+            exit(1)
         }
         
         dispatchGroup.wait()
@@ -205,5 +204,9 @@ public final class ACKLocalization {
     
     private func displayError(_ localizationError: LocalizationError) {
         print("[ERROR]", localizationError.message)
+    }
+    
+    private func displaySuccess() {
+        print("Successfully generated")
     }
 }
