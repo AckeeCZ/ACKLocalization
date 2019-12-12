@@ -30,7 +30,7 @@ let package = Package(
             name: "ACKLocalization",
             dependencies: ["ACKLocalizationCore"]),
         .testTarget(
-            name: "ACKLocalizationTests",
+            name: "ACKLocalizationCoreTests",
             dependencies: ["ACKLocalizationCore"]),
     ]
 )
