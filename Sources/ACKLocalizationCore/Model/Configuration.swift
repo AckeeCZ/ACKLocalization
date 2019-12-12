@@ -7,6 +7,8 @@
 
 import Foundation
 
+public typealias LanguageMapping = [String: String]
+
 /// Object representing app parameters
 public struct Configuration: Decodable {
     /// Path to destination directory where generated strings files should be saved
@@ -16,7 +18,7 @@ public struct Configuration: Decodable {
     public let keyColumnName: String
     
     /// Mapping of language column names to app languages
-    public let languageMapping: [String: String]
+    public let languageMapping: LanguageMapping
     
     /// Path to service account file that will be used to access spreadsheet
     public let serviceAccount: String

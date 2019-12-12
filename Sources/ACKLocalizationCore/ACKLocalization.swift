@@ -8,6 +8,8 @@
 import Combine
 import Foundation
 
+public typealias MappedValues = [String: [LocRow]]
+
 public final class ACKLocalization {
     private let authAPI: AuthAPIServicing
     private let sheetsAPI: SheetsAPIServicing
@@ -30,6 +32,7 @@ public final class ACKLocalization {
             let config = try loadConfiguration()
             
             fetchCancellable = fetchSheetValues(config)
+                .flatMap { [weak self] in self?.transformValuesPublisher($0, with: config) ?? Fail(error: LocalizationError(message: "Unable to transform values")).eraseToAnyPublisher() }
                 .sink(receiveCompletion: { [weak self] result in
                     switch result {
                     case .failure(let error): self?.displayError(error)
@@ -63,6 +66,61 @@ public final class ACKLocalization {
             .flatMap { sheetsAPI.fetchSheet(spreadsheetTabName, from: $0, accessToken: accessToken!) }
             .mapError(LocalizationError.init)
             .eraseToAnyPublisher()
+    }
+    
+    public func transformValues(_ valueRange: ValueRange, with mapping: LanguageMapping, keyColumnName: String) throws -> MappedValues {
+        // check that we have any column, that contains string keys
+        guard let keyColIndex = valueRange.firstIndex(columnName: keyColumnName) else {
+            throw LocalizationError(message: "Unable to find column named `" + keyColumnName + "` in the first sheet row")
+        }
+        
+        // spreadsheet contains only header row
+        guard valueRange.values.count > 1 else { return [:] }
+        
+        var result = MappedValues()
+        
+        // skip first row as that is the header row
+        valueRange.values[1...].forEach { rowValues in
+            // skip rows which do not contain a key
+            guard let key = rowValues[safe: keyColIndex], key.count > 0 else { return }
+            
+            mapping.forEach { sheetColName, langCode in
+                // find index of current language
+                guard let langIndex = valueRange.firstIndex(columnName: sheetColName) else { return }
+                
+                // try to fetch 
+                if let value = rowValues[safe: langIndex].map ({ LocRow(key: key, value: $0) }) {
+                    var langRows = result[langCode] ?? []
+                    langRows.append(value)
+                    result[langCode] = langRows
+                }
+            }
+        }
+        
+        return result
+    }
+    
+    public func transformValuesPublisher(_ valueRange: ValueRange, with mapping: LanguageMapping, keyColumnName: String) -> AnyPublisher<MappedValues, LocalizationError> {
+        Future { [weak self] promise in
+            guard let self = self else {
+                promise(.failure(LocalizationError(message: "Unable to transform values")))
+                return
+            }
+            
+            do {
+                let transformedValues = try self.transformValues(valueRange, with: mapping, keyColumnName: keyColumnName)
+                promise(.success(transformedValues))
+            } catch {
+                switch error {
+                case let localizationError as LocalizationError: promise(.failure(localizationError))
+                default: promise(.failure(LocalizationError(message: error.localizedDescription)))
+                }
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    public func transformValuesPublisher(_ valueRange: ValueRange, with config: Configuration) -> AnyPublisher<MappedValues, LocalizationError> {
+        transformValuesPublisher(valueRange, with: config.languageMapping, keyColumnName: config.keyColumnName)
     }
     
     // MARK: - Private helpers
