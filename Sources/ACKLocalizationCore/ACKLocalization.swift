@@ -8,11 +8,17 @@
 import Combine
 import Foundation
 
+/// Type used for representation of result map values that will be written to destination file
 public typealias MappedValues = [String: [LocRow]]
 
+/// Class containing all `ACKLocalization` logic
 public final class ACKLocalization {
+    /// Auth API used to fetch access token for spreadsheet API
     private let authAPI: AuthAPIServicing
+    
+    /// Spreadsheet API used to fetch spreadsheet content
     private let sheetsAPI: SheetsAPIServicing
+    
     private var fetchCancellable: Cancellable?
     
     // MARK: - Initializers
@@ -24,6 +30,7 @@ public final class ACKLocalization {
     
     // MARK: - Public interface
     
+    /// Main that loads configuration from _localization.json_, fetches access token and loads content of spreadsheet
     public func run() {
         let dispatchGroup = DispatchGroup()
         
@@ -56,6 +63,9 @@ public final class ACKLocalization {
         dispatchGroup.wait()
     }
     
+    /// Fetches content of given sheet from spreadsheet using given `serviceAccount`
+    ///
+    /// If not `spreadsheetTabName` is provided, the first in the spreadsheet is used
     public func fetchSheetValues(_ spreadsheetTabName: String?, spreadsheetId: String, serviceAccount: ServiceAccount) -> AnyPublisher<ValueRange, LocalizationError> {
         let sheetsAPI = self.sheetsAPI
         var accessToken: AccessToken?
@@ -68,6 +78,7 @@ public final class ACKLocalization {
             .eraseToAnyPublisher()
     }
     
+    /// Transforms given value range (content of spreadsheet) using given language mapping to `MappedValue` which can be written out to output file
     public func transformValues(_ valueRange: ValueRange, with mapping: LanguageMapping, keyColumnName: String) throws -> MappedValues {
         // check that we have any column, that contains string keys
         guard let keyColIndex = valueRange.firstIndex(columnName: keyColumnName) else {
@@ -100,6 +111,7 @@ public final class ACKLocalization {
         return result
     }
     
+    /// Transforms given value range (content of spreadsheet) using given language mapping to `MappedValue` which can be written out to output file
     public func transformValuesPublisher(_ valueRange: ValueRange, with mapping: LanguageMapping, keyColumnName: String) -> AnyPublisher<MappedValues, LocalizationError> {
         Future { [weak self] promise in
             guard let self = self else {
@@ -119,10 +131,12 @@ public final class ACKLocalization {
         }.eraseToAnyPublisher()
     }
     
+    /// Transforms given value range (content of spreadsheet) using given config to `MappedValue` which can be written out to output file
     public func transformValuesPublisher(_ valueRange: ValueRange, with config: Configuration) -> AnyPublisher<MappedValues, LocalizationError> {
         transformValuesPublisher(valueRange, with: config.languageMapping, keyColumnName: config.keyColumnName)
     }
     
+    /// Saves given `mappedValues` to correct directory file
     public func saveMappedValues(_ mappedValues: MappedValues, directory: String, stringsFileName: String) throws {
         try mappedValues.forEach { langCode, rows in
             let dirPath = directory + "/" + langCode + ".lproj"
@@ -157,6 +171,7 @@ public final class ACKLocalization {
         }
     }
     
+    /// Saves given `mappedValues` to correct directory file
     public func saveMappedValuesPublisher(_ mappedValues: MappedValues, directory: String, stringsFileName: String) -> AnyPublisher<Void, LocalizationError> {
         Future { [weak self] promise in
             guard let self = self else {
@@ -176,12 +191,14 @@ public final class ACKLocalization {
         }.eraseToAnyPublisher()
     }
     
+    /// Saves given `mappedValues` to correct directory file
     public func saveMappedValuesPublisher(_ mappedValues: MappedValues, config: Configuration) -> AnyPublisher<Void, LocalizationError> {
         saveMappedValuesPublisher(mappedValues, directory: config.destinationDir, stringsFileName: config.stringsFileName ?? "Localizable.strings")
     }
     
     // MARK: - Private helpers
     
+    /// Loads configuration from `localization.json` file
     private func loadConfiguration() throws -> Configuration {
         guard let configData = FileManager.default.contents(atPath: "localization.json") else {
             throw LocalizationError(message: "Unable to find `localization.json` config file. Does it exist in current directory?")
@@ -194,6 +211,7 @@ public final class ACKLocalization {
         }
     }
     
+    /// Loads service account from given `config`
     private func loadServiceAccount(from config: Configuration) throws -> ServiceAccount {
         guard let serviceAccountData = FileManager.default.contents(atPath: config.serviceAccount) else {
             throw LocalizationError(message: "Unable to load service account at " + config.serviceAccount)
@@ -206,6 +224,7 @@ public final class ACKLocalization {
         }
     }
     
+    /// Fetches sheet values from given `config`
     private func fetchSheetValues(_ config: Configuration) -> AnyPublisher<ValueRange, LocalizationError> {
         do {
             let serviceAccount = try loadServiceAccount(from: config)
@@ -220,17 +239,21 @@ public final class ACKLocalization {
         }
     }
     
+    /// Actually writes given `rows` to given `file`
     private func writeRows(_ rows: [LocRow], to file: String) throws {
         try rows.map { $0.localizableRow }
             .joined(separator: "\n")
             .write(toFile: file, atomically: true, encoding: .utf8)
     }
     
+    /// Displays error to stdout
     private func displayError(_ localizationError: LocalizationError) {
-        print("[ERROR]", localizationError.message)
+        let message = "❌ " + localizationError.message
+        FileHandle.standardError.write(message.data(using: .utf8)!)
     }
     
+    /// Displays success to stdout
     private func displaySuccess() {
-        print("Successfully generated")
+        print("✅ Successfully generated localizations!")
     }
 }
