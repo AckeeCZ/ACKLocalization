@@ -132,7 +132,25 @@ public final class ACKLocalization {
             try? FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true)
             
             do {
-                try rows.map { $0.localizableRow }.joined(separator: "\n").write(toFile: filePath, atomically: true, encoding: .utf8)
+                // we filter out entries with `plist.` prefix as they will be written into different file
+                try writeRows(rows.filter { !$0.key.hasPrefix(Constants.plistKeyPrefix + ".") }, to: filePath)
+                
+                // write plist values to appropriate files
+                var plistOutputs = [String: [LocRow]]()
+                
+                rows.filter { $0.key.hasPrefix(Constants.plistKeyPrefix + ".") }.forEach { row in
+                    // key format for this type of entry is `plist.<plist_file_name>.<key>`
+                    let components = row.key.components(separatedBy: ".")
+                    
+                    guard components.count > 2 else { return }
+                    
+                    let plistName = components[1]
+                    var rows = plistOutputs[plistName] ?? []
+                    rows.append(LocRow(key: components[2...].joined(separator: "."), value: row.value))
+                    plistOutputs[plistName] = rows
+                }
+                
+                try plistOutputs.forEach { try writeRows($1, to: dirPath + "/" + $0 + ".strings") }
             } catch {
                 throw LocalizationError(message: "Unable to save mapped values - " + error.localizedDescription)
             }
@@ -200,6 +218,12 @@ public final class ACKLocalization {
                 return Fail(error: LocalizationError(message: error.localizedDescription)).eraseToAnyPublisher()
             }
         }
+    }
+    
+    private func writeRows(_ rows: [LocRow], to file: String) throws {
+        try rows.map { $0.localizableRow }
+            .joined(separator: "\n")
+            .write(toFile: file, atomically: true, encoding: .utf8)
     }
     
     private func displayError(_ localizationError: LocalizationError) {
