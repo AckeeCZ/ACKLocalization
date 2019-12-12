@@ -7,11 +7,17 @@
 
 import Foundation
 
+/// Struct holding content of a single sheet
 public struct ValueRange: Decodable {
+    /// Represented range in sheet
     public let range: String
-    public let majorDimension: String
+    
+    /// String values in sheet
     public let values: [[String]]
     
+    /// Get index of `columnName`
+    ///
+    /// Checks first row and returns index of `columnName` if any
     func firstIndex(columnName: String) -> Int? {
         values.first?.firstIndex(of: columnName)
     }
