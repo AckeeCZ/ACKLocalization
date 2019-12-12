@@ -7,23 +7,26 @@
 
 import Foundation
 
+/// Struct holding information about fetch spreadsheet
 public struct Spreadsheet: Decodable {
-    public struct Properties: Decodable {
-        public let title: String
-        public let autoRecalc: String
-    }
-    
+    /// Struct holding information about a single sheet
     public struct Sheet: Decodable {
+        /// Struct holding sheet properties
         public struct Properties: Decodable {
+            /// Identifier of sheet
             public let sheetId: Int
+            
+            /// Name of sheet
             public let title: String
-            public let index: Int
         }
         
+        /// Sheet properties
         let properties: Properties
     }
     
+    /// Identifier of spreadsheet
     public let spreadsheetId: String
-    public let properties: Properties
+    
+    /// List of sheets in spreadsheet
     public let sheets: [Sheet]
 }
