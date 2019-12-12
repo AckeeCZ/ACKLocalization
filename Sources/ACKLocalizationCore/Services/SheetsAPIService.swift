@@ -8,14 +8,26 @@
 import Combine
 import Foundation
 
+/// Protocol wrapping service that fetches information about spreadsheet
 public protocol SheetsAPIServicing: AnyObject {
+    /// Access token that will be used with all requests
     var accessToken: AccessToken? { get set }
     
+    /// Fetch information about given spreadsheet
+    ///
+    /// Uses `accessToken` property for authorization
     func fetchSpreadsheet(_ identifier: String) -> AnyPublisher<Spreadsheet, RequestError>
+    
+    /// Fetch content of given sheet from given spreadsheet
+    ///
+    /// If no `sheetName` is provided we use the first sheet
+    /// Uses `accessToken` property for authorization
     func fetchSheet(_ sheetName: String?, from spreadsheet: Spreadsheet) -> AnyPublisher<ValueRange, RequestError>
 }
 
+/// Service that fetches information about spreadsheet
 public final class SheetsAPIService: SheetsAPIServicing {
+    /// Access token that will be used with all requests
     public var accessToken: AccessToken?
     
     private let session: URLSession
@@ -29,6 +41,9 @@ public final class SheetsAPIService: SheetsAPIServicing {
     
     // MARK: - API calls
     
+    /// Fetch information about given spreadsheet
+    ///
+    /// Uses `accessToken` property for authorization
     public func fetchSpreadsheet(_ identifier: String) -> AnyPublisher<Spreadsheet, RequestError> {
         let url = URL(string: "https://sheets.googleapis.com/v4/spreadsheets/" + identifier)!
         var request = URLRequest(url: url)
@@ -41,6 +56,10 @@ public final class SheetsAPIService: SheetsAPIServicing {
             .eraseToAnyPublisher()
     }
     
+    /// Fetch content of given sheet from given spreadsheet
+    ///
+    /// If no `sheetName` is provided we use the first sheet
+    /// Uses `accessToken` property for authorization
     public func fetchSheet(_ sheetName: String?, from spreadsheet: Spreadsheet) -> AnyPublisher<ValueRange, RequestError> {
         let sheetName = sheetName ?? spreadsheet.sheets.first?.properties.title ?? ""
         var urlComponents = URLComponents(string: "https://sheets.googleapis.com/v4/spreadsheets/" + spreadsheet.spreadsheetId + "/values/" + sheetName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)!
