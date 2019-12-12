@@ -9,10 +9,13 @@ import Combine
 import Foundation
 import SwiftJWT
 
+/// Protocol wrapping a service that fetches an access token from further communication
 public protocol AuthAPIServicing {
+    /// Fetch access token for given `serviceAccount`
     func fetchAccessToken(serviceAccount: ServiceAccount) -> AnyPublisher<AccessToken, RequestError>
 }
 
+/// Service that fetches an access token from further communication
 public struct AuthAPIService: AuthAPIServicing {
     private let session: URLSession
     
@@ -24,6 +27,7 @@ public struct AuthAPIService: AuthAPIServicing {
     
     // MARK: - API calls
     
+    /// Fetch access token for given `serviceAccount`
     public func fetchAccessToken(serviceAccount: ServiceAccount) -> AnyPublisher<AccessToken, RequestError> {
         let jwt = self.jwt(for: serviceAccount)
         let url = URL(string: "https://oauth2.googleapis.com/token")!
@@ -42,6 +46,7 @@ public struct AuthAPIService: AuthAPIServicing {
     
     // MARK: - Private helpers
     
+    /// Create JWT token that will be sent to retrieve access token
     private func jwt(for serviceAccount: ServiceAccount) -> String {
         let header = Header(typ: "JWT")
         let now = Int(Date().timeIntervalSince1970)
