@@ -33,6 +33,7 @@ public final class ACKLocalization {
             
             fetchCancellable = fetchSheetValues(config)
                 .flatMap { [weak self] in self?.transformValuesPublisher($0, with: config) ?? Fail(error: LocalizationError(message: "Unable to transform values")).eraseToAnyPublisher() }
+                .flatMap { [weak self] in self?.saveMappedValuesPublisher($0, config: config) ?? Fail(error: LocalizationError(message: "Unable to save mapped values")).eraseToAnyPublisher() }
                 .sink(receiveCompletion: { [weak self] result in
                     switch result {
                     case .failure(let error): self?.displayError(error)
@@ -88,7 +89,7 @@ public final class ACKLocalization {
                 // find index of current language
                 guard let langIndex = valueRange.firstIndex(columnName: sheetColName) else { return }
                 
-                // try to fetch 
+                // try to get value for current language
                 if let value = rowValues[safe: langIndex].map ({ LocRow(key: key, value: $0) }) {
                     var langRows = result[langCode] ?? []
                     langRows.append(value)
@@ -121,6 +122,45 @@ public final class ACKLocalization {
     
     public func transformValuesPublisher(_ valueRange: ValueRange, with config: Configuration) -> AnyPublisher<MappedValues, LocalizationError> {
         transformValuesPublisher(valueRange, with: config.languageMapping, keyColumnName: config.keyColumnName)
+    }
+    
+    public func saveMappedValues(_ mappedValues: MappedValues, directory: String, stringsFileName: String) throws {
+        try mappedValues.forEach { langCode, rows in
+            let dirPath = directory + "/" + langCode + ".lproj"
+            let filePath = dirPath + "/" + stringsFileName
+            
+            try? FileManager.default.removeItem(atPath: filePath)
+            try? FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true)
+            
+            do {
+                try rows.map { $0.localizableRow }.joined(separator: "\n").write(toFile: filePath, atomically: true, encoding: .utf8)
+            } catch {
+                throw LocalizationError(message: "Unable to save mapped values - " + error.localizedDescription)
+            }
+        }
+    }
+    
+    public func saveMappedValuesPublisher(_ mappedValues: MappedValues, directory: String, stringsFileName: String) -> AnyPublisher<Void, LocalizationError> {
+        Future { [weak self] promise in
+            guard let self = self else {
+                promise(.failure(LocalizationError(message: "Unable to save mapped values")))
+                return
+            }
+            
+            do {
+                try self.saveMappedValues(mappedValues, directory: directory, stringsFileName: stringsFileName)
+                promise(.success(()))
+            } catch {
+                switch error {
+                case let localizationError as LocalizationError: promise(.failure(localizationError))
+                default: promise(.failure(LocalizationError(message: error.localizedDescription)))
+                }
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    public func saveMappedValuesPublisher(_ mappedValues: MappedValues, config: Configuration) -> AnyPublisher<Void, LocalizationError> {
+        saveMappedValuesPublisher(mappedValues, directory: config.destinationDir, stringsFileName: config.stringsFileName ?? "Localizable.strings")
     }
     
     // MARK: - Private helpers
