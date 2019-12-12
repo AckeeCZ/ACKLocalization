@@ -8,22 +8,27 @@
 import Foundation
 
 /// Object representing app parameters
-struct Configuration: Decodable {
+public struct Configuration: Decodable {
     /// Path to destination directory where generated strings files should be saved
-    let destinationDir: String
+    public let destinationDir: String
     
     /// Name of column that contains keys to be localized
-    let keyColumnName: String
+    public let keyColumnName: String
     
     /// Mapping of language column names to app languages
-    let languageMapping: [String: String]
+    public let languageMapping: [String: String]
     
     /// Path to service account file that will be used to access spreadsheet
-    let serviceAccount: String
+    public let serviceAccount: String
     
     /// Identifier of spreadsheet that should be downloaded
-    let spreadsheetID: String
+    public let spreadsheetID: String
+    
+    /// Name of spreadsheet tab to be fetched
+    ///
+    /// If nothing is specified, we will use the first tab in spreadsheet
+    public let spreadsheetTabName: String?
     
     /// Name of strings file that should be generated
-    let stringsFileName: String?
+    public let stringsFileName: String?
 }
