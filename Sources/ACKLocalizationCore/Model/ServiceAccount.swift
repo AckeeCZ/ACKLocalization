@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  ServiceAccount.swift
 //  
 //
 //  Created by Jakub Olejník on 11/12/2019.
