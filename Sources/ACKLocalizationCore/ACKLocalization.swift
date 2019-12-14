@@ -32,34 +32,30 @@ public final class ACKLocalization {
     
     /// Main that loads configuration from _localization.json_, fetches access token and loads content of spreadsheet
     public func run() {
+        callThrowingCode {
+            let config = try loadConfiguration()
+            run(configuration: config)
+        }
+    }
+    
+    public func run(configuration config: Configuration) {
         let dispatchGroup = DispatchGroup()
         
         dispatchGroup.enter()
-        do {
-            let config = try loadConfiguration()
-            
+        callThrowingCode {
             fetchCancellable = fetchSheetValues(config)
-                .flatMap { [weak self] in self?.transformValuesPublisher($0, with: config) ?? Fail(error: LocalizationError(message: "Unable to transform values")).eraseToAnyPublisher() }
-                .flatMap { [weak self] in self?.saveMappedValuesPublisher($0, config: config) ?? Fail(error: LocalizationError(message: "Unable to save mapped values")).eraseToAnyPublisher() }
-                .sink(receiveCompletion: { [weak self] result in
-                    switch result {
-                    case .failure(let error):
-                        self?.displayError(error)
-                        exit(1)
-                    case .finished: self?.displaySuccess()
-                    }
-                    dispatchGroup.leave()
-                }) { _ in }
-        } catch {
-          switch error {
-            case let localizationError as LocalizationError:
-                displayError(localizationError)
-            default:
-                print(error)
-            }
-            exit(1)
+            .flatMap { [weak self] in self?.transformValuesPublisher($0, with: config) ?? Fail(error: LocalizationError(message: "Unable to transform values")).eraseToAnyPublisher() }
+            .flatMap { [weak self] in self?.saveMappedValuesPublisher($0, config: config) ?? Fail(error: LocalizationError(message: "Unable to save mapped values")).eraseToAnyPublisher() }
+            .sink(receiveCompletion: { [weak self] result in
+                switch result {
+                case .failure(let error):
+                    self?.displayError(error)
+                    exit(1)
+                case .finished: self?.displaySuccess()
+                }
+                dispatchGroup.leave()
+            }) { _ in }
         }
-        
         dispatchGroup.wait()
     }
     
@@ -255,5 +251,20 @@ public final class ACKLocalization {
     /// Displays success to stdout
     private func displaySuccess() {
         print("✅ Successfully generated localizations!")
+    }
+    
+    /// Calls throwing code and deals with its errors
+    private func callThrowingCode(code: (() throws -> Void)) {
+        do {
+            try code()
+        } catch {
+          switch error {
+            case let localizationError as LocalizationError:
+                displayError(localizationError)
+            default:
+                print(error)
+            }
+            exit(1)
+        }
     }
 }
