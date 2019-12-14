@@ -8,6 +8,8 @@
 
 ## master
 
+## 0.3.1
+
 - add `%i` to known format specifiers (#12, kudos to @olejnjak)
 - migrate to Swift 5 (#12, kudos to @olejnjak)
 
