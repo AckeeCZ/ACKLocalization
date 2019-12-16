@@ -18,6 +18,15 @@ public struct LocRow {
     /// Representation that can be used as row in strings file
     public var localizableRow: String { return "\"" + key + "\" = \"" + normalizedValue + "\";" }
     
+    // MARK: - Initializers
+    
+    public init(key: String, value: String) {
+        self.key = key
+        self.value = value
+    }
+    
+    // MARK: - Private helpers
+    
     /// Value with replaced placeholder arguments
     private var normalizedValue: String {
         return value
