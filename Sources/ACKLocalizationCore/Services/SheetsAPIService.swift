@@ -50,7 +50,7 @@ public final class SheetsAPIService: SheetsAPIServicing {
         credentials?.addToRequest(&request)
         
         return session.dataTaskPublisher(for: request)
-            .map(\.data)
+            .validate()
             .decode(type: Spreadsheet.self, decoder: JSONDecoder())
             .mapError(RequestError.init)
             .eraseToAnyPublisher()
@@ -68,7 +68,7 @@ public final class SheetsAPIService: SheetsAPIServicing {
         credentials?.addToRequest(&request)
         
         return session.dataTaskPublisher(for: request)
-            .map(\.data)
+            .validate()
             .decode(type: ValueRange.self, decoder: JSONDecoder())
             .mapError(RequestError.init)
             .eraseToAnyPublisher()

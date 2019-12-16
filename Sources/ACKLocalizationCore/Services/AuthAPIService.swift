@@ -38,7 +38,7 @@ public struct AuthAPIService: AuthAPIServicing {
         request.httpBody = try? JSONEncoder().encode(requestData)
 
         return session.dataTaskPublisher(for: request)
-            .map(\.data)
+            .validate()
             .decode(type: AccessToken.self, decoder: JSONDecoder())
             .mapError(RequestError.init)
             .eraseToAnyPublisher()

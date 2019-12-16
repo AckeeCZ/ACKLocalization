@@ -11,6 +11,8 @@ import Foundation
 public struct LocalizationError: Error {
     /// Descriptive message of error
     public let message: String
+    
+    var localizedDescription: String { message }
 }
 
 extension LocalizationError {
