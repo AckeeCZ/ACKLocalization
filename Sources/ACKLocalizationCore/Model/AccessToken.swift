@@ -29,11 +29,15 @@ internal struct AccessTokenRequest: Encodable {
         case grantType = "grant_type"
     }
     
+    /// Previously generated JWT token
     let assertion: String
+    
+    /// Requested grant type
     let grantType = "urn:ietf:params:oauth:grant-type:jwt-bearer"
 }
 
 extension AccessToken: CredentialsType {
+    /// Adds `Authorization` header to given `request`
     public func addToRequest(_ request: inout URLRequest) {
         request.addValue(headerValue, forHTTPHeaderField: "Authorization")
     }

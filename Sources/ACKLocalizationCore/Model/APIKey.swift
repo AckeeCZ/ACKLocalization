@@ -7,7 +7,9 @@
 
 import Foundation
 
+/// Struct that is used to represent Google API key
 public struct APIKey {
+    /// Value of API key
     public let value: String
 }
 
@@ -18,6 +20,7 @@ extension APIKey: ExpressibleByStringLiteral {
 }
 
 extension APIKey: CredentialsType {
+    /// Adds `key` query parameter to `request`
     public func addToRequest(_ request: inout URLRequest) {
         guard let url = request.url else { return }
         var urlComponents = URLComponents(string: url.absoluteString)
