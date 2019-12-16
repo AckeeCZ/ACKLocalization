@@ -11,4 +11,6 @@ import Foundation
 public struct RequestError: Error {
     /// Error received e.g. from `URLSession`
     public let underlyingError: Error
+    
+    public var localizedDescription: String { underlyingError.localizedDescription }
 }
