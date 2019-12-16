@@ -11,7 +11,7 @@ import Foundation
 /// Protocol wrapping service that fetches information about spreadsheet
 public protocol SheetsAPIServicing: AnyObject {
     /// Access token that will be used with all requests
-    var accessToken: AccessToken? { get set }
+    var credentials: CredentialsType? { get set }
     
     /// Fetch information about given spreadsheet
     ///
@@ -28,15 +28,15 @@ public protocol SheetsAPIServicing: AnyObject {
 /// Service that fetches information about spreadsheet
 public final class SheetsAPIService: SheetsAPIServicing {
     /// Access token that will be used with all requests
-    public var accessToken: AccessToken?
+    public var credentials: CredentialsType?
     
     private let session: URLSession
     
     // MARK: - Initializers
     
-    public init(session: URLSession = .shared, accessToken: AccessToken? = nil) {
+    public init(session: URLSession = .shared, credentials: CredentialsType? = nil) {
         self.session = session
-        self.accessToken = accessToken
+        self.credentials = credentials
     }
     
     // MARK: - API calls
@@ -47,7 +47,7 @@ public final class SheetsAPIService: SheetsAPIServicing {
     public func fetchSpreadsheet(_ identifier: String) -> AnyPublisher<Spreadsheet, RequestError> {
         let url = URL(string: "https://sheets.googleapis.com/v4/spreadsheets/" + identifier)!
         var request = URLRequest(url: url)
-        request.addValue(accessToken?.headerValue ?? "", forHTTPHeaderField: "Authorization")
+        credentials?.addToRequest(&request)
         
         return session.dataTaskPublisher(for: request)
             .map(\.data)
@@ -65,7 +65,7 @@ public final class SheetsAPIService: SheetsAPIServicing {
         var urlComponents = URLComponents(string: "https://sheets.googleapis.com/v4/spreadsheets/" + spreadsheet.spreadsheetId + "/values/" + sheetName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)!
         urlComponents.queryItems = [URLQueryItem(name: "valueRenderOption", value: "UNFORMATTED_VALUE")]
         var request = URLRequest(url: urlComponents.url!)
-        request.addValue(accessToken?.headerValue ?? "", forHTTPHeaderField: "Authorization")
+        credentials?.addToRequest(&request)
         
         return session.dataTaskPublisher(for: request)
             .map(\.data)

@@ -34,16 +34,15 @@ public final class ACKLocalization {
     public func run() {
         callThrowingCode {
             let config = try loadConfiguration()
-            run(configuration: config)
+            try run(configuration: config)
         }
     }
     
-    public func run(configuration config: Configuration) {
+    public func run(configuration config: Configuration) throws {
         let dispatchGroup = DispatchGroup()
         
         dispatchGroup.enter()
-        callThrowingCode {
-            fetchCancellable = fetchSheetValues(config)
+        fetchCancellable = fetchSheetValues(config)
             .flatMap { [weak self] in self?.transformValuesPublisher($0, with: config) ?? Fail(error: LocalizationError(message: "Unable to transform values")).eraseToAnyPublisher() }
             .flatMap { [weak self] in self?.saveMappedValuesPublisher($0, config: config) ?? Fail(error: LocalizationError(message: "Unable to save mapped values")).eraseToAnyPublisher() }
             .sink(receiveCompletion: { [weak self] result in
@@ -55,7 +54,6 @@ public final class ACKLocalization {
                 }
                 dispatchGroup.leave()
             }) { _ in }
-        }
         dispatchGroup.wait()
     }
     
@@ -66,9 +64,19 @@ public final class ACKLocalization {
         let sheetsAPI = self.sheetsAPI
         
         return authAPI.fetchAccessToken(serviceAccount: serviceAccount)
-            .handleEvents(receiveOutput: { sheetsAPI.accessToken = $0 })
+            .handleEvents(receiveOutput: { sheetsAPI.credentials = $0 })
             .map { _ in }
             .flatMap { sheetsAPI.fetchSpreadsheet(spreadsheetId) }
+            .flatMap { sheetsAPI.fetchSheet(spreadsheetTabName, from: $0) }
+            .mapError(LocalizationError.init)
+            .eraseToAnyPublisher()
+    }
+    
+    public func fetchSheetValues(_ spreadsheetTabName: String?, spreadsheetId: String, apiKey: APIKey) -> AnyPublisher<ValueRange, LocalizationError> {
+        let sheetsAPI = self.sheetsAPI
+        sheetsAPI.credentials = apiKey
+        
+        return sheetsAPI.fetchSpreadsheet(spreadsheetId)
             .flatMap { sheetsAPI.fetchSheet(spreadsheetTabName, from: $0) }
             .mapError(LocalizationError.init)
             .eraseToAnyPublisher()
@@ -208,23 +216,29 @@ public final class ACKLocalization {
     }
     
     /// Loads service account from given `config`
-    private func loadServiceAccount(from config: Configuration) throws -> ServiceAccount {
-        guard let serviceAccountData = FileManager.default.contents(atPath: config.serviceAccount) else {
-            throw LocalizationError(message: "Unable to load service account at " + config.serviceAccount)
+    private func loadServiceAccount(from path: String) throws -> ServiceAccount {
+        guard let serviceAccountData = FileManager.default.contents(atPath: path) else {
+            throw LocalizationError(message: "Unable to load service account at " + path)
         }
         
         do {
             return try JSONDecoder().decode(ServiceAccount.self, from: serviceAccountData)
         } catch {
-            throw LocalizationError(message: "Unable to read `" + config.serviceAccount + "` - " + error.localizedDescription)
+            throw LocalizationError(message: "Unable to read service account from `" + path + "` - " + error.localizedDescription)
         }
     }
     
     /// Fetches sheet values from given `config`
     private func fetchSheetValues(_ config: Configuration) -> AnyPublisher<ValueRange, LocalizationError> {
         do {
-            let serviceAccount = try loadServiceAccount(from: config)
-            return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, serviceAccount: serviceAccount)
+            if let serviceAccountPath = config.serviceAccount {
+                let serviceAccount = try loadServiceAccount(from: serviceAccountPath)
+                return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, serviceAccount: serviceAccount)
+            } else if let apiKey = config.apiKey {
+                return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, apiKey: apiKey)
+            } else {
+                throw LocalizationError(message: "Either `apiKey` or `serviceAccount` must be provided in `localization.json` file")
+            }
         } catch {
             switch error {
             case let localizationError as LocalizationError:

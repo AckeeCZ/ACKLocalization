@@ -20,7 +20,7 @@ public struct AccessToken: Decodable {
     public let type: String
     
     /// Value that can be used in HTTP request header
-    public var headerValue: String { type + " " + accessToken }
+    private var headerValue: String { type + " " + accessToken }
 }
 
 internal struct AccessTokenRequest: Encodable {
@@ -31,4 +31,10 @@ internal struct AccessTokenRequest: Encodable {
     
     let assertion: String
     let grantType = "urn:ietf:params:oauth:grant-type:jwt-bearer"
+}
+
+extension AccessToken: CredentialsType {
+    public func addToRequest(_ request: inout URLRequest) {
+        request.addValue(headerValue, forHTTPHeaderField: "Authorization")
+    }
 }

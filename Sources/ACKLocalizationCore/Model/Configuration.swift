@@ -11,6 +11,11 @@ public typealias LanguageMapping = [String: String]
 
 /// Object representing app parameters
 public struct Configuration: Decodable {
+    /// API key that will be used to comunicate with Google Sheets API
+    ///
+    /// Either `apiKey` or `serviceAccount` must be provided, if both are provided, then `serviceAccount` will be used
+    public let apiKey: APIKey?
+    
     /// Path to destination directory where generated strings files should be saved
     public let destinationDir: String
     
@@ -21,7 +26,9 @@ public struct Configuration: Decodable {
     public let languageMapping: LanguageMapping
     
     /// Path to service account file that will be used to access spreadsheet
-    public let serviceAccount: String
+    ///
+    /// Either `apiKey` or `serviceAccount` must be provided, if both are provided, then `serviceAccount` will be used
+    public let serviceAccount: String?
     
     /// Identifier of spreadsheet that should be downloaded
     public let spreadsheetID: String
