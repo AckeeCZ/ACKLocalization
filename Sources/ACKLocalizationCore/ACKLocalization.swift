@@ -200,6 +200,27 @@ public final class ACKLocalization {
         saveMappedValuesPublisher(mappedValues, directory: config.destinationDir, stringsFileName: config.stringsFileName ?? "Localizable.strings")
     }
     
+    /// Fetches sheet values from given `config`
+    public func fetchSheetValues(_ config: Configuration) -> AnyPublisher<ValueRange, LocalizationError> {
+        do {
+            if let serviceAccountPath = config.serviceAccount {
+                let serviceAccount = try loadServiceAccount(from: serviceAccountPath)
+                return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, serviceAccount: serviceAccount)
+            } else if let apiKey = config.apiKey {
+                return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, apiKey: apiKey)
+            } else {
+                throw LocalizationError(message: "Either `apiKey` or `serviceAccount` must be provided in `localization.json` file")
+            }
+        } catch {
+            switch error {
+            case let localizationError as LocalizationError:
+                return Fail(error: localizationError).eraseToAnyPublisher()
+            default:
+                return Fail(error: LocalizationError(message: error.localizedDescription)).eraseToAnyPublisher()
+            }
+        }
+    }
+    
     // MARK: - Private helpers
     
     /// Loads configuration from `localization.json` file
@@ -225,27 +246,6 @@ public final class ACKLocalization {
             return try JSONDecoder().decode(ServiceAccount.self, from: serviceAccountData)
         } catch {
             throw LocalizationError(message: "Unable to read service account from `" + path + "` - " + error.localizedDescription)
-        }
-    }
-    
-    /// Fetches sheet values from given `config`
-    private func fetchSheetValues(_ config: Configuration) -> AnyPublisher<ValueRange, LocalizationError> {
-        do {
-            if let serviceAccountPath = config.serviceAccount {
-                let serviceAccount = try loadServiceAccount(from: serviceAccountPath)
-                return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, serviceAccount: serviceAccount)
-            } else if let apiKey = config.apiKey {
-                return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, apiKey: apiKey)
-            } else {
-                throw LocalizationError(message: "Either `apiKey` or `serviceAccount` must be provided in `localization.json` file")
-            }
-        } catch {
-            switch error {
-            case let localizationError as LocalizationError:
-                return Fail(error: localizationError).eraseToAnyPublisher()
-            default:
-                return Fail(error: LocalizationError(message: error.localizedDescription)).eraseToAnyPublisher()
-            }
         }
     }
     
