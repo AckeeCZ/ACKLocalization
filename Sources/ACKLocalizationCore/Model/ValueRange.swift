@@ -18,7 +18,12 @@ public struct ValueRange: Decodable {
     /// Get index of `columnName`
     ///
     /// Checks first row and returns index of `columnName` if any
-    func firstIndex(columnName: String) -> Int? {
+    public func firstIndex(columnName: String) -> Int? {
         values.first?.firstIndex(of: columnName)
+    }
+    
+    public init(range: String, values: [[String]]) {
+        self.range = range
+        self.values = values
     }
 }
