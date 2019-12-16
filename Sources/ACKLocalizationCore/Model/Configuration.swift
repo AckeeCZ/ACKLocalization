@@ -40,4 +40,16 @@ public struct Configuration: Decodable {
     
     /// Name of strings file that should be generated
     public let stringsFileName: String?
+    
+    public init(apiKey: APIKey?, destinationDir: String, keyColumnName: String, languageMapping: LanguageMapping, serviceAccount: String?,
+         spreadsheetID: String, spreadsheetTabName: String?, stringsFileName: String?) {
+        self.apiKey = apiKey
+        self.destinationDir = destinationDir
+        self.keyColumnName = keyColumnName
+        self.languageMapping = languageMapping
+        self.serviceAccount = serviceAccount
+        self.spreadsheetID = spreadsheetID
+        self.spreadsheetTabName = spreadsheetTabName
+        self.stringsFileName = stringsFileName
+    }
 }
