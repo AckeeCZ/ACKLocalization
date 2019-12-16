@@ -13,6 +13,12 @@ public struct LocalizationError: Error {
     public let message: String
     
     var localizedDescription: String { message }
+    
+    // MARK: Innitializers
+    
+    public init(message: String) {
+        self.message = message
+    }
 }
 
 extension LocalizationError {
