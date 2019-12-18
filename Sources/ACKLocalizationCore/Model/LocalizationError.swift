@@ -13,7 +13,7 @@ public struct LocalizationError: Error {
     public let message: String
     
     /// Code of error
-    var code: Code?
+    public let code: Code?
     
     var localizedDescription: String { message }
     
