@@ -12,12 +12,16 @@ public struct LocalizationError: Error {
     /// Descriptive message of error
     public let message: String
     
+    /// Code of error
+    var code: Code?
+    
     var localizedDescription: String { message }
     
     // MARK: Innitializers
     
-    public init(message: String) {
+    public init(message: String, code: Code? = nil) {
         self.message = message
+        self.code = code
     }
 }
 
@@ -25,5 +29,19 @@ extension LocalizationError {
     /// Creates `LocalizationError` from `RequestError`
     init(_ error: RequestError) {
         message = error.localizedDescription
+        
+        if let googleError = error.underlyingError as? GoogleError, googleError.isMissingTab {
+            code = .missingSheetTab
+        } else {
+            code = nil
+        }
+    }
+}
+
+extension LocalizationError {
+    /// Code that helps to determine what went wrong
+    public enum Code {
+        /// Error while fetching spreadsheet values - given tab doesn't exist
+        case missingSheetTab
     }
 }

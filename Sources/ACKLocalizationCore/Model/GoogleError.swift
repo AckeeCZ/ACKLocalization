@@ -15,3 +15,10 @@ struct GoogleError: Error, Decodable {
     
     var localizedDescription: String { message}
 }
+
+extension GoogleError {
+    /// Determine if `self` is error because of missing requested tab in spreadsheet
+    var isMissingTab: Bool {
+        code == 400 && status == "INVALID_ARGUMENT"
+    }
+}
