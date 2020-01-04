@@ -47,15 +47,6 @@
         }
       },
       {
-        "package": "Reqres",
-        "repositoryURL": "https://github.com/AckeeCZ/Reqres",
-        "state": {
-          "branch": null,
-          "revision": "99ec5f97e8ad9da6824764c8fbb5aa61e14c5019",
-          "version": "3.1.1"
-        }
-      },
-      {
         "package": "SwiftJWT",
         "repositoryURL": "https://github.com/IBM-Swift/Swift-JWT",
         "state": {

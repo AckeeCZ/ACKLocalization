@@ -7,11 +7,6 @@
 
 import ACKLocalizationCore
 import Foundation
-import Reqres
-
-#if DEBUG
-Reqres.register()
-#endif
 
 let localization = ACKLocalization()
 
