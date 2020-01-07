@@ -1,5 +1,5 @@
 import XCTest
-@testable import LocalizationCore
+@testable import ACKLocalizationCore
 
 final class LocRowTests: XCTestCase {
     func testBasicRow() {

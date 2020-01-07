@@ -8,6 +8,10 @@
 
 ## master
 
+- create new ACKLocalization (#13, kudos to @olejnjak)
+    - works with service accounts instead of published document
+    - is configured with a file instead of ton of arguments
+
 ## 0.3.1
 
 - add `%i` to known format specifiers (#12, kudos to @olejnjak)

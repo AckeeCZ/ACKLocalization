@@ -1,18 +1,33 @@
 //
 //  LocRow.swift
-//  LocalizationCore
+//  
 //
-//  Created by Jakub Olejník on 14/12/2017.
+//  Created by Jakub Olejník on 12/12/2019.
 //
 
 import Foundation
 
-struct LocRow {
-    let key: String
-    let value: String
+/// Struct representing single `Localizable.strings` row
+public struct LocRow {
+    /// Key of current row
+    public let key: String
     
-    var localizableRow: String { return "\"" + key + "\" = \"" + normalizedValue + "\";" }
+    /// Original value from spreadsheet
+    public let value: String
     
+    /// Representation that can be used as row in strings file
+    public var localizableRow: String { return "\"" + key + "\" = \"" + normalizedValue + "\";" }
+    
+    // MARK: - Initializers
+    
+    public init(key: String, value: String) {
+        self.key = key
+        self.value = value
+    }
+    
+    // MARK: - Private helpers
+    
+    /// Value with replaced placeholder arguments
     private var normalizedValue: String {
         return value
             .replacingOccurrences(of: "\"", with: "\\\"")
@@ -31,6 +46,7 @@ struct LocRow {
 }
 
 private extension String {
+    /// Replaces positioned arguments by given separator
     func replacingPositionedArgs(separator: String) -> String {
         return components(separatedBy: separator)
         .map {
@@ -40,6 +56,5 @@ private extension String {
                 .replacingOccurrences(of: "$s", with: "$@")
         }
         .joined(separator: separator)
-
     }
 }
