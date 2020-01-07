@@ -8,6 +8,8 @@
 
 ## master
 
+## 1.0.0
+
 - create new ACKLocalization (#13, kudos to @olejnjak)
     - works with service accounts instead of published document
     - is configured with a file instead of ton of arguments
