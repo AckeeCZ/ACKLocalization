@@ -6,9 +6,9 @@ script:
 - pod lib lint --skip-import-validation --skip-tests --allow-warnings
 before_deploy:
 - swift build --static-swift-stdlib --configuration release
-- export BINARY_PATH=`swift build --show-bin-path --configuration release`/Localization
+- export BINARY_PATH=`swift build --show-bin-path --configuration release`/ACKLocalization
 - mv "$BINARY_PATH" .
-- zip -r acklocalization-$TRAVIS_TAG.zip LICENSE Localization
+- zip -r acklocalization-$TRAVIS_TAG.zip LICENSE ACKLocalization
 after_deploy:
 - pod trunk push --skip-import-validation --skip-tests --allow-warnings
 deploy:
