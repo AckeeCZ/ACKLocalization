@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'ACKLocalization'
-  s.version          = '0.3.3'
+  s.version          = '1.0.0'
   s.summary          = 'Localize app from Google Spreadsheet'
 
 # This description is used to generate tags and improve search results.
