@@ -19,8 +19,7 @@ jobs:
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
       - name: Archive
         run: | 
-        export BINARY_PATH=`swift build --show-bin-path --configuration release`/ACKLocalization
-        mv "$BINARY_PATH" .
+        mv "${swift build --show-bin-path --configuration release}/ACKLocalization" .
         zip -r acklocalization-${{ steps.get_version.outputs.VERSION }}.zip LICENSE ACKLocalization
       - uses: xresloader/upload-to-github-release@v1
         if: startsWith(github.ref, 'refs/tags/')
