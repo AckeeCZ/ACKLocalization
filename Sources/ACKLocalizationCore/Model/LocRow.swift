@@ -39,6 +39,7 @@ public struct LocRow {
             .replacingOccurrences(of: "%%d", with: "%d")
             .replacingOccurrences(of: "%%s", with: "%s")
             .replacingOccurrences(of: "%%f", with: "%f")
+            .replacingOccurrences(of: "%%.([0-9])f", with: "%.$1f", options: .regularExpression)
             .replacingOccurrences(of: "%%i", with: "%i")
             .replacingPositionedArgs(separator: " ")
             .replacingPositionedArgs(separator: "\n")

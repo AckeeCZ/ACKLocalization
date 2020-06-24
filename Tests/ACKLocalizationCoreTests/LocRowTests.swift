@@ -22,6 +22,16 @@ final class LocRowTests: XCTestCase {
         XCTAssertEqual("\"float_key\" = \"float value %f\";", locRow.localizableRow)
     }
     
+    func testOneDecimalFloatRow() {
+        let locRow = LocRow(key: "float_key", value: "float value with one decimal %.1f")
+        XCTAssertEqual(#""float_key" = "float value with one decimal %.1f";"#, locRow.localizableRow)
+    }
+    
+    func testThreeDecimalFloatRow() {
+        let locRow = LocRow(key: "float_key", value: "float value with three decimals %.3f")
+        XCTAssertEqual(#""float_key" = "float value with three decimals %.3f";"#, locRow.localizableRow)
+    }
+    
     func testStringRow() {
         let locRow = LocRow(key: "string_key", value: "string value %s")
         XCTAssertEqual("\"string_key\" = \"string value %@\";", locRow.localizableRow)

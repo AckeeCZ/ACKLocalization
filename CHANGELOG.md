@@ -8,6 +8,10 @@
 
 ## master
 
+### Added
+
+- Add support for specifiying number of decimals for float ([#15](https://github.com/AckeeCZ/ACKLocalization/pull/15), kudos to @fortmarek)
+
 ## 1.0.0
 
 - create new ACKLocalization (#13, kudos to @olejnjak)
