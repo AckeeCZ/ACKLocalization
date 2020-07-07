@@ -140,6 +140,50 @@ public final class ACKLocalization {
         transformValuesPublisher(valueRange, with: config.languageMapping, keyColumnName: config.keyColumnName)
     }
     
+    struct PluralKeyWrapper: Codable {
+        let translations: [PluralKey]
+        
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CustomKey.self)
+            
+            var items = [
+                "NSStringFormatSpecTypeKey": "NSStringPluralRuleType",
+                "NSStringFormatValueTypeKey": "d"
+            ]
+            translations.forEach {
+                items[$0.key.rawValue] = $0.value
+            }
+            
+            try container.encode("%#@inner@", forKey: .init(stringValue: "NSStringLocalizedFormatKey"))
+            try container.encode(items, forKey: .init(stringValue: "inner"))
+        }
+    }
+    
+    enum PluralTranslationKey: String, Codable {
+        case zero
+        case one
+        case two
+        case few
+        case many
+        case other
+    }
+    
+    struct PluralKey: Codable {
+        let key: PluralTranslationKey
+        let value: String
+    }
+    
+    struct CustomKey: CodingKey {
+        var stringValue: String
+        var intValue: Int? { nil }
+
+        init(stringValue: String) {
+            self.stringValue = stringValue
+        }
+
+        init?(intValue: Int) { nil }
+    }
+    
     /// Saves given `mappedValues` to correct directory file
     public func saveMappedValues(_ mappedValues: MappedValues, directory: String, stringsFileName: String) throws {
         try mappedValues.forEach { langCode, rows in
@@ -149,6 +193,33 @@ public final class ACKLocalization {
             try? FileManager.default.removeItem(atPath: filePath)
             try? FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true)
             
+            var plurals: [String: PluralKeyWrapper] = [:]
+        
+            rows.forEach {
+                guard
+                    let patternRange = $0.key.range(of: #"\#\#\{[a-z]+\}{1}$"#, options: .regularExpression),
+                    let key = $0.key.components(separatedBy: "##").first
+                else { return }
+                
+                let pattern = $0.key[patternRange]
+                
+                guard let pluralKeyRange = pattern.range(of: "[a-z]+", options: .regularExpression) else { assertionFailure(); return }
+                
+                let pluralKey = String(pattern[pluralKeyRange])
+                
+                var currentTranslations = plurals[key]?.translations ?? []
+                guard let translationKey = PluralTranslationKey(rawValue: pluralKey) else { fatalError() }
+                let translation = PluralKey(key: translationKey, value: $0.value)
+                currentTranslations.append(translation)
+
+                plurals[key] = PluralKeyWrapper(translations: currentTranslations)
+            }
+            
+            let encoder = PropertyListEncoder()
+            encoder.outputFormat = .xml
+            let data = try! encoder.encode(plurals)
+            try! data.write(to: URL(fileURLWithPath: dirPath + "/" + "plurals.stringsDict"))
+
             do {
                 // we filter out entries with `plist.` prefix as they will be written into different file
                 try writeRows(rows.filter { !$0.key.hasPrefix(Constants.plistKeyPrefix + ".") }, to: filePath)
