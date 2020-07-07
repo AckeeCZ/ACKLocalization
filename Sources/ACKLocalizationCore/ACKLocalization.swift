@@ -140,50 +140,6 @@ public final class ACKLocalization {
         transformValuesPublisher(valueRange, with: config.languageMapping, keyColumnName: config.keyColumnName)
     }
     
-    struct PluralKeyWrapper: Codable {
-        let translations: [PluralKey]
-        
-        func encode(to encoder: Encoder) throws {
-            var container = encoder.container(keyedBy: CustomKey.self)
-            
-            var items = [
-                "NSStringFormatSpecTypeKey": "NSStringPluralRuleType",
-                "NSStringFormatValueTypeKey": "d"
-            ]
-            translations.forEach {
-                items[$0.key.rawValue] = $0.value
-            }
-            
-            try container.encode("%#@inner@", forKey: .init(stringValue: "NSStringLocalizedFormatKey"))
-            try container.encode(items, forKey: .init(stringValue: "inner"))
-        }
-    }
-    
-    enum PluralTranslationKey: String, Codable {
-        case zero
-        case one
-        case two
-        case few
-        case many
-        case other
-    }
-    
-    struct PluralKey: Codable {
-        let key: PluralTranslationKey
-        let value: String
-    }
-    
-    struct CustomKey: CodingKey {
-        var stringValue: String
-        var intValue: Int? { nil }
-
-        init(stringValue: String) {
-            self.stringValue = stringValue
-        }
-
-        init?(intValue: Int) { nil }
-    }
-    
     /// Saves given `mappedValues` to correct directory file
     public func saveMappedValues(_ mappedValues: MappedValues, directory: String, stringsFileName: String) throws {
         try mappedValues.forEach { langCode, rows in
