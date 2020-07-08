@@ -188,7 +188,7 @@ public final class ACKLocalization {
                     // we filter out entries with `plist.` prefix as they will be written into different file
                     .filter { !$0.key.hasPrefix(Constants.plistKeyPrefix + ".") }
                     // Filter out plurals
-                    .filter { $0.key.range(o f: pluralPattern, options: .regularExpression) == nil }
+                    .filter { $0.key.range(of: pluralPattern, options: .regularExpression) == nil }
                 
                 try writeRows(finalRows, to: filePath)
                 
