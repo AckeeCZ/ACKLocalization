@@ -153,10 +153,11 @@ public final class ACKLocalization {
             // Collection of plural rules for a given translation key.
             // Translation key is the base without the suffix ##{plural-rule}
             var plurals: [String: PluralRuleWrapper] = [:]
+            let pluralPattern = #"\#\#\{[a-z]+\}{1}$"#
             rows.forEach {
                 guard
                     // Matches the translation key that contains the predefined plural pattern
-                    let patternRange = $0.key.range(of: #"\#\#\{[a-z]+\}{1}$"#, options: .regularExpression),
+                    let patternRange = $0.key.range(of: pluralPattern, options: .regularExpression),
                     // Loads the base of that translation key
                     let key = $0.key.components(separatedBy: "##").first
                 else { return }
@@ -183,8 +184,13 @@ public final class ACKLocalization {
             }
 
             do {
-                // we filter out entries with `plist.` prefix as they will be written into different file
-                try writeRows(rows.filter { !$0.key.hasPrefix(Constants.plistKeyPrefix + ".") }, to: filePath)
+                let finalRows = rows
+                    // we filter out entries with `plist.` prefix as they will be written into different file
+                    .filter { !$0.key.hasPrefix(Constants.plistKeyPrefix + ".") }
+                    // Filter out plurals
+                    .filter { $0.key.range(o f: pluralPattern, options: .regularExpression) == nil }
+                
+                try writeRows(finalRows, to: filePath)
                 
                 // write plist values to appropriate files
                 var plistOutputs = [String: [LocRow]]()
