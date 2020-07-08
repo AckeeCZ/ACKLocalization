@@ -145,36 +145,42 @@ public final class ACKLocalization {
         try mappedValues.forEach { langCode, rows in
             let dirPath = directory + "/" + langCode + ".lproj"
             let filePath = dirPath + "/" + stringsFileName
+            let pluralsPath = dirPath + "/pluralization.stringsDict"
             
             try? FileManager.default.removeItem(atPath: filePath)
             try? FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true)
             
-            var plurals: [String: PluralKeyWrapper] = [:]
-        
+            // Collection of plural rules for a given translation key.
+            // Translation key is the base without the suffix ##{plural-rule}
+            var plurals: [String: PluralRuleWrapper] = [:]
             rows.forEach {
                 guard
+                    // Matches the translation key that contains the predefined plural pattern
                     let patternRange = $0.key.range(of: #"\#\#\{[a-z]+\}{1}$"#, options: .regularExpression),
+                    // Loads the base of that translation key
                     let key = $0.key.components(separatedBy: "##").first
                 else { return }
                 
                 let pattern = $0.key[patternRange]
                 
+                // Loads the current plural rule
                 guard let pluralKeyRange = pattern.range(of: "[a-z]+", options: .regularExpression) else { assertionFailure(); return }
                 
+                // Using `Range` on the `String` gives us `Substring`
+                // and we need `String`
                 let pluralKey = String(pattern[pluralKeyRange])
                 
+                // Load all translations for the given key
                 var currentTranslations = plurals[key]?.translations ?? []
-                guard let translationKey = PluralTranslationKey(rawValue: pluralKey) else { fatalError() }
-                let translation = PluralKey(key: translationKey, value: $0.value)
+                
+                // Check if the plural rule is valid
+                guard let translationKey = PluralRuleKey(rawValue: pluralKey) else { assertionFailure(); return }
+                
+                // Create new rule and add it to the other rules
+                let translation = PluralRule(key: translationKey, value: $0.value)
                 currentTranslations.append(translation)
-
-                plurals[key] = PluralKeyWrapper(translations: currentTranslations)
+                plurals[key] = PluralRuleWrapper(translations: currentTranslations)
             }
-            
-            let encoder = PropertyListEncoder()
-            encoder.outputFormat = .xml
-            let data = try! encoder.encode(plurals)
-            try! data.write(to: URL(fileURLWithPath: dirPath + "/" + "plurals.stringsDict"))
 
             do {
                 // we filter out entries with `plist.` prefix as they will be written into different file
@@ -196,6 +202,12 @@ public final class ACKLocalization {
                 }
                 
                 try plistOutputs.forEach { try writeRows($1, to: dirPath + "/" + $0 + ".strings") }
+                
+                // Create stringDict from data and save it
+                let encoder = PropertyListEncoder()
+                encoder.outputFormat = .xml
+                let data = try encoder.encode(plurals)
+                try data.write(to: URL(fileURLWithPath: pluralsPath))
             } catch {
                 throw LocalizationError(message: "Unable to save mapped values - " + error.localizedDescription)
             }
