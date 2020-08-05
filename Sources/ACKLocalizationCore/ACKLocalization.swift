@@ -145,7 +145,7 @@ public final class ACKLocalization {
         try mappedValues.forEach { langCode, rows in
             let dirPath = directory + "/" + langCode + ".lproj"
             let filePath = dirPath + "/" + stringsFileName
-            let pluralsPath = dirPath + "/pluralization.stringsDict"
+            let pluralsPath = dirPath + "/Localizable.stringsDict"
             
             try? FileManager.default.removeItem(atPath: filePath)
             try? FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true)
