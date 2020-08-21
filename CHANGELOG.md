@@ -8,6 +8,10 @@
 
 ## master
 
+### 1.1
+
+- Add support for plural keys ([#16](https://github.com/AckeeCZ/ACKLocalization/pull/16), kudos to @LukasHromadnik)
+
 ### 1.0.1
 
 ### Added
