@@ -141,11 +141,11 @@ public final class ACKLocalization {
     }
     
     /// Saves given `mappedValues` to correct directory file
-    public func saveMappedValues(_ mappedValues: MappedValues, directory: String, stringsFileName: String) throws {
+    public func saveMappedValues(_ mappedValues: MappedValues, directory: String, stringsFileName: String, stringsDictFileName: String) throws {
         try mappedValues.forEach { langCode, rows in
             let dirPath = directory + "/" + langCode + ".lproj"
             let filePath = dirPath + "/" + stringsFileName
-            let pluralsPath = dirPath + "/Localizable.stringsDict"
+            let pluralsPath = dirPath + "/" + stringsDictFileName
             
             try? FileManager.default.removeItem(atPath: filePath)
             try? FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true)
@@ -221,7 +221,7 @@ public final class ACKLocalization {
     }
     
     /// Saves given `mappedValues` to correct directory file
-    public func saveMappedValuesPublisher(_ mappedValues: MappedValues, directory: String, stringsFileName: String) -> AnyPublisher<Void, LocalizationError> {
+    public func saveMappedValuesPublisher(_ mappedValues: MappedValues, directory: String, stringsFileName: String, stringsDictFileName: String) -> AnyPublisher<Void, LocalizationError> {
         Future { [weak self] promise in
             guard let self = self else {
                 promise(.failure(LocalizationError(message: "Unable to save mapped values")))
@@ -229,7 +229,7 @@ public final class ACKLocalization {
             }
             
             do {
-                try self.saveMappedValues(mappedValues, directory: directory, stringsFileName: stringsFileName)
+                try self.saveMappedValues(mappedValues, directory: directory, stringsFileName: stringsFileName, stringsDictFileName: stringsDictFileName)
                 promise(.success(()))
             } catch {
                 switch error {
@@ -242,7 +242,7 @@ public final class ACKLocalization {
     
     /// Saves given `mappedValues` to correct directory file
     public func saveMappedValuesPublisher(_ mappedValues: MappedValues, config: Configuration) -> AnyPublisher<Void, LocalizationError> {
-        saveMappedValuesPublisher(mappedValues, directory: config.destinationDir, stringsFileName: config.stringsFileName ?? "Localizable.strings")
+        saveMappedValuesPublisher(mappedValues, directory: config.destinationDir, stringsFileName: config.stringsFileName ?? "Localizable.strings", stringsDictFileName: config.stringsDictFileName ?? "Localizable.stringsDict")
     }
     
     /// Fetches sheet values from given `config`
