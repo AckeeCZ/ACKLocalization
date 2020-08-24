@@ -140,6 +140,40 @@ public final class ACKLocalization {
         transformValuesPublisher(valueRange, with: config.languageMapping, keyColumnName: config.keyColumnName)
     }
     
+    func buildPlurals(from rows: [LocRow]) -> [String: PluralRuleWrapper] {
+        var plurals: [String: PluralRuleWrapper] = [:]
+        rows.forEach {
+            guard
+                // Matches the translation key that contains the predefined plural pattern
+                let patternRange = $0.key.range(of: Constants.pluralPattern, options: .regularExpression),
+                // Loads the base of that translation key
+                let key = $0.key.components(separatedBy: "##").first
+            else { return }
+            
+            let pattern = $0.key[patternRange]
+            
+            // Loads the current plural rule
+            guard let pluralKeyRange = pattern.range(of: Constants.pluralKeyPattern, options: .regularExpression) else { assertionFailure(); return }
+            
+            // Using `Range` on the `String` gives us `Substring`
+            // and we need `String`
+            let pluralKey = String(pattern[pluralKeyRange])
+            
+            // Load all translations for the given key
+            var currentTranslations = plurals[key]?.translations ?? []
+            
+            // Check if the plural rule is valid
+            guard let translationKey = PluralRuleKey(rawValue: pluralKey) else { assertionFailure(); return }
+            
+            // Create new rule and add it to the other rules
+            let translation = PluralRule(key: translationKey, value: $0.value)
+            currentTranslations.append(translation)
+            plurals[key] = PluralRuleWrapper(translations: currentTranslations)
+        }
+        
+        return plurals
+    }
+    
     /// Saves given `mappedValues` to correct directory file
     public func saveMappedValues(_ mappedValues: MappedValues, directory: String, stringsFileName: String, stringsDictFileName: String) throws {
         try mappedValues.forEach { langCode, rows in
@@ -152,43 +186,14 @@ public final class ACKLocalization {
             
             // Collection of plural rules for a given translation key.
             // Translation key is the base without the suffix ##{plural-rule}
-            var plurals: [String: PluralRuleWrapper] = [:]
-            let pluralPattern = #"\#\#\{[a-z]+\}{1}$"#
-            rows.forEach {
-                guard
-                    // Matches the translation key that contains the predefined plural pattern
-                    let patternRange = $0.key.range(of: pluralPattern, options: .regularExpression),
-                    // Loads the base of that translation key
-                    let key = $0.key.components(separatedBy: "##").first
-                else { return }
-                
-                let pattern = $0.key[patternRange]
-                
-                // Loads the current plural rule
-                guard let pluralKeyRange = pattern.range(of: "[a-z]+", options: .regularExpression) else { assertionFailure(); return }
-                
-                // Using `Range` on the `String` gives us `Substring`
-                // and we need `String`
-                let pluralKey = String(pattern[pluralKeyRange])
-                
-                // Load all translations for the given key
-                var currentTranslations = plurals[key]?.translations ?? []
-                
-                // Check if the plural rule is valid
-                guard let translationKey = PluralRuleKey(rawValue: pluralKey) else { assertionFailure(); return }
-                
-                // Create new rule and add it to the other rules
-                let translation = PluralRule(key: translationKey, value: $0.value)
-                currentTranslations.append(translation)
-                plurals[key] = PluralRuleWrapper(translations: currentTranslations)
-            }
+            let plurals = buildPlurals(from: rows)
 
             do {
                 let finalRows = rows
                     // we filter out entries with `plist.` prefix as they will be written into different file
                     .filter { !$0.key.hasPrefix(Constants.plistKeyPrefix + ".") }
                     // Filter out plurals
-                    .filter { $0.key.range(of: pluralPattern, options: .regularExpression) == nil }
+                    .filter { $0.key.range(of: Constants.pluralPattern, options: .regularExpression) == nil }
                 
                 try writeRows(finalRows, to: filePath)
                 

@@ -8,7 +8,11 @@
 import Foundation
 
 /// Struct holding important constants used throughout the tool
-public struct Constants {
+public enum Constants {
     /// Prefix that defines that localization key holds plist item
     public static let plistKeyPrefix = "plist"
+    
+    public static let pluralKeyPattern = "(zero|one|two|few|many|other)"
+    
+    public static let pluralPattern = #"\#\#\{\#(pluralKeyPattern)\}{1}$"#
 }
