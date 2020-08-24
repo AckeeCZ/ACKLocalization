@@ -7,23 +7,8 @@
 
 import Foundation
 
-public enum PluralError: Error {
+public enum PluralError: Error, Equatable {
     case missingTranslationKey(String)
     case missingPluralRule(String)
     case invalidPluralRule(String)
-}
-
-extension PluralError: Equatable {
-    public static func == (lhs: Self, rhs: Self) -> Bool {
-        switch (lhs, rhs) {
-        case let (.missingTranslationKey(lhsKey), .missingTranslationKey(rhsKey)):
-            return lhsKey == rhsKey
-        case let (.missingPluralRule(lhsKey), .missingPluralRule(rhsKey)):
-            return lhsKey == rhsKey
-        case let (.invalidPluralRule(lhsKey), .invalidPluralRule(rhsKey)):
-            return lhsKey == rhsKey
-        default:
-            return false
-        }
-    }
 }
