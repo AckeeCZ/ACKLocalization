@@ -144,35 +144,49 @@ public final class ACKLocalization {
     ///
     /// - Parameter `rows`: All translations of the selected language
     /// - Returns: Plural keys that are specified in `rows`
-    func buildPlurals(from rows: [LocRow]) -> [String: PluralRuleWrapper] {
+    func buildPlurals(from rows: [LocRow]) throws -> [String: PluralRuleWrapper] {
         var plurals: [String: PluralRuleWrapper] = [:]
-        rows.forEach {
-            guard
-                // Matches the translation key that contains the predefined plural pattern
-                let patternRange = $0.key.range(of: Constants.pluralPattern, options: .regularExpression),
-                // Loads the base of that translation key
-                let key = $0.key.components(separatedBy: "##").first
-            else { return }
+        
+        let regular = try NSRegularExpression(pattern: Constants.pluralPattern, options: [])
+        
+        try rows.forEach {
+            // Try to split the translation key into the actual key and the plural rule key
+            // based on the predefined regular expression
+            let matches = regular.matches(in: $0.key, options: [], range: NSRange(location: 0, length: $0.key.utf16.count))
             
-            let pattern = $0.key[patternRange]
+            // Skip key which doesn't contain the translation rule
+            // There should be always exactly one match
+            guard let match = matches.first else { return }
             
-            // Loads the current plural rule
-            guard let pluralKeyRange = pattern.range(of: Constants.pluralKeyPattern, options: .regularExpression) else { assertionFailure(); return }
+            // Index 0 – range of the whole string
+            // Index 1 – range of the translation key
+            let translationKeyRange = match.range(at: 1)
             
-            // Using `Range` on the `String` gives us `Substring`
-            // and we need `String`
-            let pluralKey = String(pattern[pluralKeyRange])
+            // Check if the actual translation key is presented
+            guard translationKeyRange.location != NSNotFound else { throw PluralError.missingTranslationKey($0.key) }
+
+            // Get the actual translation key from the `translationKeyRange`
+            let translationKey = ($0.key as NSString).substring(with: translationKeyRange)
+
+            // Index 2 – range of the plural rule
+            let pluralRuleRange = match.range(at: 2)
+            
+            // Check if the plural rule is presented
+            guard pluralRuleRange.location != NSNotFound else { throw PluralError.missingPluralRule($0.key) }
+            
+            // Get the plural rule from the `pluralRuleRange`
+            let pluralRuleString = ($0.key as NSString).substring(with: pluralRuleRange)
+
+            // Check if the plural rule is valid
+            guard let pluralRuleKey = PluralRuleKey(rawValue: pluralRuleString) else { throw PluralError.invalidPluralRule($0.key) }
             
             // Load all translations for the given key
-            var currentTranslations = plurals[key]?.translations ?? []
-            
-            // Check if the plural rule is valid
-            guard let translationKey = PluralRuleKey(rawValue: pluralKey) else { assertionFailure(); return }
+            var currentTranslations = plurals[translationKey]?.translations ?? []
             
             // Create new rule and add it to the other rules
-            let translation = PluralRule(key: translationKey, value: $0.value)
+            let translation = PluralRule(key: pluralRuleKey, value: $0.value)
             currentTranslations.append(translation)
-            plurals[key] = PluralRuleWrapper(translations: currentTranslations)
+            plurals[translationKey] = PluralRuleWrapper(translations: currentTranslations)
         }
         
         return plurals
@@ -187,12 +201,12 @@ public final class ACKLocalization {
             
             try? FileManager.default.removeItem(atPath: filePath)
             try? FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true)
-            
-            // Collection of plural rules for a given translation key.
-            // Translation key is the base without the suffix ##{plural-rule}
-            let plurals = buildPlurals(from: rows)
 
             do {
+                // Collection of plural rules for a given translation key.
+                // Translation key is the base without the suffix ##{plural-rule}
+                let plurals = try buildPlurals(from: rows)
+                
                 let finalRows = rows
                     // we filter out entries with `plist.` prefix as they will be written into different file
                     .filter { !$0.key.hasPrefix(Constants.plistKeyPrefix + ".") }
