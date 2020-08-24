@@ -115,8 +115,10 @@ This is example folder structure of the project
 |------ServiceAccount.json
 |------en.lproj
 |----------Localizable.strings
+|----------Localizable.stringsDict
 |------cs.lproj
 |----------Localizable.strings
+|----------Localizable.stringsDict
 ```
 
 #### Spreadsheet structure
@@ -146,6 +148,18 @@ This is the example config file:
     "spreadsheetTabName": "Localizations"
 }
 ```
+
+### Plural keys
+
+To add plurals to the spreadsheet you need to specify the translation key and the plural type in the following convention
+
+```
+translation.key##{zero}
+translation.key##{one}
+translation.key##{two}
+```
+
+This will be automatically generated into `Localizable.stringsDict` and the key won't be presented in `Localizable.strings`.
 
 ## Author
 

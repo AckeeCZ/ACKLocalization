@@ -8,9 +8,11 @@
 
 ## master
 
-### 1.0.1
-
 ### Added
+
+- Add support for plural keys ([#16](https://github.com/AckeeCZ/ACKLocalization/pull/16), kudos to @LukasHromadnik)
+
+### 1.0.1
 
 - Add support for specifiying number of decimals for float ([#15](https://github.com/AckeeCZ/ACKLocalization/pull/15), kudos to @fortmarek)
 

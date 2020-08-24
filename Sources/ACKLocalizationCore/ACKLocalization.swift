@@ -140,18 +140,80 @@ public final class ACKLocalization {
         transformValuesPublisher(valueRange, with: config.languageMapping, keyColumnName: config.keyColumnName)
     }
     
+    /// Builds plurals from `rows` of each language
+    ///
+    /// - Parameter `rows`: All translations of the selected language
+    /// - Returns: Plural keys that are specified in `rows`
+    func buildPlurals(from rows: [LocRow]) throws -> [String: PluralRuleWrapper] {
+        var plurals: [String: PluralRuleWrapper] = [:]
+        
+        let regular = try NSRegularExpression(pattern: Constants.pluralPattern, options: [])
+        
+        try rows.forEach {
+            // Try to split the translation key into the actual key and the plural rule key
+            // based on the predefined regular expression
+            let matches = regular.matches(in: $0.key, options: [], range: NSRange(location: 0, length: $0.key.utf16.count))
+            
+            // Skip key which doesn't contain the translation rule
+            // There should be always exactly one match
+            guard let match = matches.first else { return }
+            
+            // Index 0 – range of the whole string
+            // Index 1 – range of the translation key
+            let translationKeyRange = match.range(at: 1)
+            
+            // Check if the actual translation key is presented
+            guard translationKeyRange.location != NSNotFound else { throw PluralError.missingTranslationKey($0.key) }
+
+            // Get the actual translation key from the `translationKeyRange`
+            let translationKey = ($0.key as NSString).substring(with: translationKeyRange)
+
+            // Index 2 – range of the plural rule
+            let pluralRuleRange = match.range(at: 2)
+            
+            // Check if the plural rule is presented
+            guard pluralRuleRange.location != NSNotFound else { throw PluralError.missingPluralRule($0.key) }
+            
+            // Get the plural rule from the `pluralRuleRange`
+            let pluralRuleString = ($0.key as NSString).substring(with: pluralRuleRange)
+
+            // Check if the plural rule is valid
+            guard let pluralRuleKey = PluralRuleKey(rawValue: pluralRuleString) else { throw PluralError.invalidPluralRule($0.key) }
+            
+            // Load all translations for the given key
+            var currentTranslations = plurals[translationKey]?.translations ?? []
+            
+            // Create new rule and add it to the other rules
+            let translation = PluralRule(key: pluralRuleKey, value: $0.value)
+            currentTranslations.append(translation)
+            plurals[translationKey] = PluralRuleWrapper(translations: currentTranslations)
+        }
+        
+        return plurals
+    }
+    
     /// Saves given `mappedValues` to correct directory file
-    public func saveMappedValues(_ mappedValues: MappedValues, directory: String, stringsFileName: String) throws {
+    public func saveMappedValues(_ mappedValues: MappedValues, directory: String, stringsFileName: String, stringsDictFileName: String) throws {
         try mappedValues.forEach { langCode, rows in
             let dirPath = directory + "/" + langCode + ".lproj"
             let filePath = dirPath + "/" + stringsFileName
+            let pluralsPath = dirPath + "/" + stringsDictFileName
             
             try? FileManager.default.removeItem(atPath: filePath)
             try? FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true)
-            
+
             do {
-                // we filter out entries with `plist.` prefix as they will be written into different file
-                try writeRows(rows.filter { !$0.key.hasPrefix(Constants.plistKeyPrefix + ".") }, to: filePath)
+                // Collection of plural rules for a given translation key.
+                // Translation key is the base without the suffix ##{plural-rule}
+                let plurals = try buildPlurals(from: rows)
+                
+                let finalRows = rows
+                    // we filter out entries with `plist.` prefix as they will be written into different file
+                    .filter { !$0.key.hasPrefix(Constants.plistKeyPrefix + ".") }
+                    // Filter out plurals
+                    .filter { $0.key.range(of: Constants.pluralPattern, options: .regularExpression) == nil }
+                
+                try writeRows(finalRows, to: filePath)
                 
                 // write plist values to appropriate files
                 var plistOutputs = [String: [LocRow]]()
@@ -169,6 +231,12 @@ public final class ACKLocalization {
                 }
                 
                 try plistOutputs.forEach { try writeRows($1, to: dirPath + "/" + $0 + ".strings") }
+                
+                // Create stringDict from data and save it
+                let encoder = PropertyListEncoder()
+                encoder.outputFormat = .xml
+                let data = try encoder.encode(plurals)
+                try data.write(to: URL(fileURLWithPath: pluralsPath))
             } catch {
                 throw LocalizationError(message: "Unable to save mapped values - " + error.localizedDescription)
             }
@@ -176,7 +244,7 @@ public final class ACKLocalization {
     }
     
     /// Saves given `mappedValues` to correct directory file
-    public func saveMappedValuesPublisher(_ mappedValues: MappedValues, directory: String, stringsFileName: String) -> AnyPublisher<Void, LocalizationError> {
+    public func saveMappedValuesPublisher(_ mappedValues: MappedValues, directory: String, stringsFileName: String, stringsDictFileName: String) -> AnyPublisher<Void, LocalizationError> {
         Future { [weak self] promise in
             guard let self = self else {
                 promise(.failure(LocalizationError(message: "Unable to save mapped values")))
@@ -184,7 +252,7 @@ public final class ACKLocalization {
             }
             
             do {
-                try self.saveMappedValues(mappedValues, directory: directory, stringsFileName: stringsFileName)
+                try self.saveMappedValues(mappedValues, directory: directory, stringsFileName: stringsFileName, stringsDictFileName: stringsDictFileName)
                 promise(.success(()))
             } catch {
                 switch error {
@@ -197,7 +265,7 @@ public final class ACKLocalization {
     
     /// Saves given `mappedValues` to correct directory file
     public func saveMappedValuesPublisher(_ mappedValues: MappedValues, config: Configuration) -> AnyPublisher<Void, LocalizationError> {
-        saveMappedValuesPublisher(mappedValues, directory: config.destinationDir, stringsFileName: config.stringsFileName ?? "Localizable.strings")
+        saveMappedValuesPublisher(mappedValues, directory: config.destinationDir, stringsFileName: config.stringsFileName ?? "Localizable.strings", stringsDictFileName: config.stringsDictFileName ?? "Localizable.stringsDict")
     }
     
     /// Fetches sheet values from given `config`
