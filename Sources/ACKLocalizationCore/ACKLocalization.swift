@@ -140,6 +140,10 @@ public final class ACKLocalization {
         transformValuesPublisher(valueRange, with: config.languageMapping, keyColumnName: config.keyColumnName)
     }
     
+    /// Builds plurals from `rows` of each language
+    ///
+    /// - Parameter `rows`: All translations of the selected language
+    /// - Returns: Plural keys that are specified in `rows`
     func buildPlurals(from rows: [LocRow]) -> [String: PluralRuleWrapper] {
         var plurals: [String: PluralRuleWrapper] = [:]
         rows.forEach {
