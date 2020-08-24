@@ -1,24 +1,5 @@
-import Combine
 import XCTest
 @testable import ACKLocalizationCore
-
-class AuthAPIServiceMock: AuthAPIServicing {
-    func fetchAccessToken(serviceAccount: ServiceAccount) -> AnyPublisher<AccessToken, RequestError> {
-        Empty().eraseToAnyPublisher()
-    }
-}
-
-class SheetsAPIServiceMock: SheetsAPIServicing {
-    var credentials: CredentialsType?
-    
-    func fetchSpreadsheet(_ identifier: String) -> AnyPublisher<Spreadsheet, RequestError> {
-        Empty().eraseToAnyPublisher()
-    }
-    
-    func fetchSheet(_ sheetName: String?, from spreadsheet: Spreadsheet) -> AnyPublisher<ValueRange, RequestError> {
-        Empty().eraseToAnyPublisher()
-    }
-}
 
 final class ACKLocalizationPluralsTests: XCTestCase {
     private var ackLocalization: ACKLocalization!
@@ -40,7 +21,7 @@ final class ACKLocalizationPluralsTests: XCTestCase {
     func testEmptyTranslations() {
         let rows: [LocRow] = []
         
-        let plurals = ackLocalization.buildPlurals(from: rows)
+        let plurals = try! ackLocalization.buildPlurals(from: rows)
         
         XCTAssertEqual(plurals.count, 0)
     }
@@ -52,7 +33,7 @@ final class ACKLocalizationPluralsTests: XCTestCase {
             LocRow(key: "key3", value: "value3")
         ]
         
-        let plurals = ackLocalization.buildPlurals(from: rows)
+        let plurals = try! ackLocalization.buildPlurals(from: rows)
         
         XCTAssertEqual(plurals.count, 0)
     }
@@ -66,7 +47,7 @@ final class ACKLocalizationPluralsTests: XCTestCase {
             LocRow(key: "key##{other}", value: "other")
         ]
         
-        let plurals = ackLocalization.buildPlurals(from: rows)
+        let plurals = try! ackLocalization.buildPlurals(from: rows)
         
         XCTAssertEqual(plurals.count, 1)
         XCTAssertEqual(Array(plurals.values)[0].translations.count, rows.count)
@@ -78,11 +59,41 @@ final class ACKLocalizationPluralsTests: XCTestCase {
             LocRow(key: "key2##{one}", value: "one")
         ]
         
-        let plurals = ackLocalization.buildPlurals(from: rows)
+        let plurals = try! ackLocalization.buildPlurals(from: rows)
         
         XCTAssertEqual(plurals.count, 2)
         for plural in plurals.values {
             XCTAssertEqual(plural.translations.count, 1)
+        }
+    }
+    
+    func testMissingTranslationKey() {
+        let rows = [
+            LocRow(key: "##{zero}", value: "zero")
+        ]
+        
+        XCTAssertThrowsError(try ackLocalization.buildPlurals(from: rows)) { error in
+            XCTAssertEqual(error as? PluralError, PluralError.missingTranslationKey(rows[0].key))
+        }
+    }
+    
+    func testMissingPluralRule() {
+        let rows = [
+            LocRow(key: "key##{}", value: "zero")
+        ]
+        
+        XCTAssertThrowsError(try ackLocalization.buildPlurals(from: rows)) { error in
+            XCTAssertEqual(error as? PluralError, PluralError.missingPluralRule(rows[0].key))
+        }
+    }
+
+    func testInvalidPluralRuleKey() {
+        let rows = [
+            LocRow(key: "key##{zeroone}", value: "zero")
+        ]
+        
+        XCTAssertThrowsError(try ackLocalization.buildPlurals(from: rows)) { error in
+            XCTAssertEqual(error as? PluralError, PluralError.invalidPluralRule(rows[0].key))
         }
     }
 }
