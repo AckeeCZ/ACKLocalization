@@ -8,7 +8,9 @@
 
 ## master
 
-### Added
+## 1.1.1
+
+### Fixed
 
 - Fix bad stringsdict file extension ([#17](https://github.com/AckeeCZ/ACKLocalization/pull/17), kudos to @IgorRosocha)
 
