@@ -265,7 +265,7 @@ public final class ACKLocalization {
     
     /// Saves given `mappedValues` to correct directory file
     public func saveMappedValuesPublisher(_ mappedValues: MappedValues, config: Configuration) -> AnyPublisher<Void, LocalizationError> {
-        saveMappedValuesPublisher(mappedValues, directory: config.destinationDir, stringsFileName: config.stringsFileName ?? "Localizable.strings", stringsDictFileName: config.stringsDictFileName ?? "Localizable.stringsDict")
+        saveMappedValuesPublisher(mappedValues, directory: config.destinationDir, stringsFileName: config.stringsFileName ?? "Localizable.strings", stringsDictFileName: config.stringsDictFileName ?? "Localizable.stringsdict")
     }
     
     /// Fetches sheet values from given `config`

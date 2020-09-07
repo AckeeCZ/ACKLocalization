@@ -8,13 +8,15 @@
 
 ## master
 
-## 1.1.0
-
 ### Added
+
+- Fix bad stringsdict file extension ([#17](https://github.com/AckeeCZ/ACKLocalization/pull/17), kudos to @IgorRosocha)
+
+## 1.1.0
 
 - Add support for plural keys ([#16](https://github.com/AckeeCZ/ACKLocalization/pull/16), kudos to @LukasHromadnik)
 
-### 1.0.1
+## 1.0.1
 
 - Add support for specifiying number of decimals for float ([#15](https://github.com/AckeeCZ/ACKLocalization/pull/15), kudos to @fortmarek)
 
