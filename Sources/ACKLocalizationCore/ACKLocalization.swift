@@ -193,7 +193,7 @@ public final class ACKLocalization {
     }
     
     /// Saves given `mappedValues` to correct directory file
-    public func saveMappedValues(_ mappedValues: MappedValues, directory: String, stringsFileName: String, stringsDictFileName: String) throws {
+    public func saveMappedValues(_ mappedValues: MappedValues, directory: String, stringsFileName: String, stringsDictFileName: String, widgetdestinationDir: String?) throws {
         try mappedValues.forEach { langCode, rows in
             let dirPath = directory + "/" + langCode + ".lproj"
             let filePath = dirPath + "/" + stringsFileName
@@ -244,7 +244,7 @@ public final class ACKLocalization {
     }
     
     /// Saves given `mappedValues` to correct directory file
-    public func saveMappedValuesPublisher(_ mappedValues: MappedValues, directory: String, stringsFileName: String, stringsDictFileName: String) -> AnyPublisher<Void, LocalizationError> {
+    public func saveMappedValuesPublisher(_ mappedValues: MappedValues, directory: String, stringsFileName: String, stringsDictFileName: String, widgetdestinationDir: String?) -> AnyPublisher<Void, LocalizationError> {
         Future { [weak self] promise in
             guard let self = self else {
                 promise(.failure(LocalizationError(message: "Unable to save mapped values")))
@@ -252,7 +252,7 @@ public final class ACKLocalization {
             }
             
             do {
-                try self.saveMappedValues(mappedValues, directory: directory, stringsFileName: stringsFileName, stringsDictFileName: stringsDictFileName)
+                try self.saveMappedValues(mappedValues, directory: directory, stringsFileName: stringsFileName, stringsDictFileName: stringsDictFileName, widgetdestinationDir: widgetdestinationDir)
                 promise(.success(()))
             } catch {
                 switch error {
@@ -265,7 +265,7 @@ public final class ACKLocalization {
     
     /// Saves given `mappedValues` to correct directory file
     public func saveMappedValuesPublisher(_ mappedValues: MappedValues, config: Configuration) -> AnyPublisher<Void, LocalizationError> {
-        saveMappedValuesPublisher(mappedValues, directory: config.destinationDir, stringsFileName: config.stringsFileName ?? "Localizable.strings", stringsDictFileName: config.stringsDictFileName ?? "Localizable.stringsdict")
+        saveMappedValuesPublisher(mappedValues, directory: config.destinationDir, stringsFileName: config.stringsFileName ?? "Localizable.strings", stringsDictFileName: config.stringsDictFileName ?? "Localizable.stringsdict", widgetdestinationDir: config.widgetDestinationDir)
     }
     
     /// Fetches sheet values from given `config`

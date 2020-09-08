@@ -44,8 +44,11 @@ public struct Configuration: Decodable {
     /// Name of stringsDict file that should be generated
     public let stringsDictFileName: String?
     
+    /// Path to widget target directory where generated strings files should be saved
+    public let widgetDestinationDir: String?
+    
     public init(apiKey: APIKey?, destinationDir: String, keyColumnName: String, languageMapping: LanguageMapping, serviceAccount: String?,
-                spreadsheetID: String, spreadsheetTabName: String?, stringsFileName: String?, stringsDictFileName: String?) {
+                spreadsheetID: String, spreadsheetTabName: String?, stringsFileName: String?, stringsDictFileName: String?, widgetdestinationDir: String?) {
         self.apiKey = apiKey
         self.destinationDir = destinationDir
         self.keyColumnName = keyColumnName
@@ -55,5 +58,6 @@ public struct Configuration: Decodable {
         self.spreadsheetTabName = spreadsheetTabName
         self.stringsFileName = stringsFileName
         self.stringsDictFileName = stringsDictFileName
+        self.widgetDestinationDir = widgetdestinationDir
     }
 }
