@@ -231,6 +231,8 @@ public final class ACKLocalization {
                 let finalRows = rows
                     // we filter out entries with `plist.` prefix as they will be written into different file
                     .filter { !$0.key.hasPrefix(Constants.plistKeyPrefix + ".") }
+                    // we filter out entries with `widget.` prefix as they will be written into different file
+                    .filter { !$0.key.hasPrefix(Constants.widgetKeyPrefix + ".") }
                     // Filter out plurals
                     .filter { $0.key.range(of: Constants.pluralPattern, options: .regularExpression) == nil }
                 
