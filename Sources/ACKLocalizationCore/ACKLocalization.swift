@@ -192,10 +192,31 @@ public final class ACKLocalization {
         return plurals
     }
     
+    
+    func writePlistValues(keyPrefix: String, rows: [LocRow], filePath: String) throws {
+        // write intentdefinitionTarget values to appropriate files
+        var outputs = [String: [LocRow]]()
+        
+        rows.filter { $0.key.hasPrefix(keyPrefix + ".") }.forEach { row in
+            // key format for this type of entry is `plist.<plist_file_name>.<key>`
+            let components = row.key.components(separatedBy: ".")
+            
+            guard components.count > 2 else { return }
+            
+            let widgetName = components[1]
+            var rows = outputs[widgetName] ?? []
+            rows.append(LocRow(key: components[2...].joined(separator: "."), value: row.value))
+            outputs[widgetName] = rows
+        }
+        
+        try outputs.forEach { try writeRows($1, to: filePath + "/" + $0 + ".strings") }
+    }
+    
     /// Saves given `mappedValues` to correct directory file
     public func saveMappedValues(_ mappedValues: MappedValues, directory: String, stringsFileName: String, stringsDictFileName: String, widgetdestinationDir: String?) throws {
         try mappedValues.forEach { langCode, rows in
-            let dirPath = directory + "/" + langCode + ".lproj"
+            let langCodePostfix = langCode + ".lproj"
+            let dirPath = directory + "/" + langCodePostfix
             let filePath = dirPath + "/" + stringsFileName
             let pluralsPath = dirPath + "/" + stringsDictFileName
             
@@ -215,22 +236,12 @@ public final class ACKLocalization {
                 
                 try writeRows(finalRows, to: filePath)
                 
-                // write plist values to appropriate files
-                var plistOutputs = [String: [LocRow]]()
+                try writePlistValues(keyPrefix: Constants.plistKeyPrefix, rows: rows, filePath: filePath)
                 
-                rows.filter { $0.key.hasPrefix(Constants.plistKeyPrefix + ".") }.forEach { row in
-                    // key format for this type of entry is `plist.<plist_file_name>.<key>`
-                    let components = row.key.components(separatedBy: ".")
-                    
-                    guard components.count > 2 else { return }
-                    
-                    let plistName = components[1]
-                    var rows = plistOutputs[plistName] ?? []
-                    rows.append(LocRow(key: components[2...].joined(separator: "."), value: row.value))
-                    plistOutputs[plistName] = rows
+                if let widgetdestinationDir = widgetdestinationDir {
+                    let widgetTargetPath = widgetdestinationDir + "/" + langCodePostfix
+                    try writePlistValues(keyPrefix: Constants.widgetKeyPrefix, rows: rows, filePath: widgetTargetPath)
                 }
-                
-                try plistOutputs.forEach { try writeRows($1, to: dirPath + "/" + $0 + ".strings") }
                 
                 // Create stringDict from data and save it
                 let encoder = PropertyListEncoder()
