@@ -14,4 +14,7 @@ public enum Constants {
     
     /// Regex pattern for suffix of the plural translations
     public static let pluralPattern = #"^([\w.]+)?##\{([\w]+)?\}$"#
+    
+    /// Prefix that defines that localization key holds widget plist item
+    public static let widgetKeyPrefix = "widget"
 }
