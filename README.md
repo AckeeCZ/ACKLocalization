@@ -86,6 +86,7 @@ Attributes documentation:
 | `spreadsheetID` | ✅ | Identifier of spreadsheet that should be downloaded |
 | `spreadsheetTabName` | ❌ | Name of spreadsheet tab to be fetched, ff nothing is specified, we will use the first tab in spreadsheet |
 | `stringsFileName` | ❌ | Name of strings file that should be generated |
+| `widgetDestinationDir` | ❌ | Path to widgetKit target destination directory where generated strings files should be saved |
 
 The file has to be in the same directory where you call ACKLocalization.
 
@@ -129,7 +130,11 @@ This is example structure of the spreadsheet with translations
 |---------|-------|------|
 | hello   | Hello | Ahoj |
 
+##### Plist file
 ACKLocalization also now supports plist files. Simply prefix the key with plist.NameOfPlist - please note that NameOfPlist is case-sensitive.
+
+##### WidgetKit Intent definition plist file
+ACKLocalization also now supports WidgetKit Intent definition plist file. Simply prefix the key with widget.NameOfWidgetKitIntentDefinitionFile - please note that NameOfWidgetKitIntentDefinitionFile is case-sensitive.
 
 #### Example config file for this case would be
 
