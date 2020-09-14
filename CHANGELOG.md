@@ -8,6 +8,9 @@
 
 ## master
 
+### Fixed
+- Fix creating empty files when spreadsheet doesn't contain any plurals or only plurals ([#20](https://github.com/AckeeCZ/ACKLocalization/pull/17), kudos to @olejnjak)
+
 ## 1.1.1
 
 ### Fixed
