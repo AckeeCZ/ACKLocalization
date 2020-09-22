@@ -245,11 +245,13 @@ public final class ACKLocalization {
                     try writePlistValues(keyPrefix: Constants.widgetKeyPrefix, rows: rows, filePath: widgetTargetPath)
                 }
                 
-                // Create stringDict from data and save it
-                let encoder = PropertyListEncoder()
-                encoder.outputFormat = .xml
-                let data = try encoder.encode(plurals)
-                try data.write(to: URL(fileURLWithPath: pluralsPath))
+                if plurals.count > 0 {
+                    // Create stringDict from data and save it
+                    let encoder = PropertyListEncoder()
+                    encoder.outputFormat = .xml
+                    let data = try encoder.encode(plurals)
+                    try data.write(to: URL(fileURLWithPath: pluralsPath))
+                }
             } catch {
                 throw LocalizationError(message: "Unable to save mapped values - " + error.localizedDescription)
             }
@@ -332,6 +334,8 @@ public final class ACKLocalization {
     
     /// Actually writes given `rows` to given `file`
     private func writeRows(_ rows: [LocRow], to file: String) throws {
+        guard rows.count > 0 else { return }
+        
         try rows.map { $0.localizableRow }
             .joined(separator: "\n")
             .write(toFile: file, atomically: true, encoding: .utf8)
