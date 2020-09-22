@@ -134,7 +134,7 @@ This is example structure of the spreadsheet with translations
 ACKLocalization also now supports plist files. Simply prefix the key with plist.NameOfPlist - please note that NameOfPlist is case-sensitive.
 
 ##### WidgetKit Intent definition plist file
-ACKLocalization also now supports WidgetKit Intent definition plist file. Simply prefix the key with widget.NameOfWidgetKitIntentDefinitionFile - please note that NameOfWidgetKitIntentDefinitionFile is case-sensitive.
+ACKLocalization also now supports WidgetKit Intentdefinition file. Simply prefix the key with widget.NameOfWidgetKitIntentdefinitionFile - please note that NameOfWidgetKitIntentDefinitionFile is case-sensitive.
 
 #### Example config file for this case would be
 
