@@ -8,10 +8,11 @@
 
 ## master
 
-## 1.1.3
-
 ### Fixed
 - Fix creating invalid keys, if contain quote marks ([#22](https://github.com/AckeeCZ/ACKLocalization/pull/22), kudos to @mateuszjablonski)
+
+### Changed
+- Internal refactoring regarding string literal escaping ([#24](https://github.com/AckeeCZ/ACKLocalization/pull/24), kudos to @olejnjak)
 
 ## 1.1.2
 
