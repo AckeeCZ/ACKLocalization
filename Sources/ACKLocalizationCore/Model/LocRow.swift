@@ -16,7 +16,7 @@ public struct LocRow {
     public let value: String
     
     /// Representation that can be used as row in strings file
-    public var localizableRow: String { return "\"" + key + "\" = \"" + normalizedValue + "\";" }
+    public var localizableRow: String { return "\"" + normalizedKey + "\" = \"" + normalizedValue + "\";" }
     
     // MARK: - Initializers
     
@@ -26,6 +26,12 @@ public struct LocRow {
     }
     
     // MARK: - Private helpers
+
+    /// Key with replaced quotes
+    private var normalizedKey: String {
+        return key
+            .replacingOccurrences(of: "\"", with: "\\\"")
+    }
     
     /// Value with replaced placeholder arguments
     private var normalizedValue: String {
