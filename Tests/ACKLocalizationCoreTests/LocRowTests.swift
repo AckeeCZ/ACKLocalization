@@ -52,14 +52,29 @@ final class LocRowTests: XCTestCase {
         XCTAssertEqual("\"abc\\\"abc\" = \"quotes_value\";", locRow.localizableRow)
     }
     
+    func testKeyQuotesAreEscaped2() {
+        let locRow = LocRow(key: "abc\"abc", value: "quotes_value")
+        XCTAssertEqual(#""abc\"abc" = "quotes_value";"#, locRow.localizableRow)
+    }
+    
     func testValueQuotesAreEscaped() {
         let locRow = LocRow(key: "quotes_key", value: "abc\"abc")
         XCTAssertEqual("\"quotes_key\" = \"abc\\\"abc\";", locRow.localizableRow)
     }
     
+    func testValueQuotesAreEscaped2() {
+        let locRow = LocRow(key: "quotes_key", value: "abc\"abc")
+        XCTAssertEqual(#""quotes_key" = "abc\"abc";"#, locRow.localizableRow)
+    }
+    
     func testNewLineIsEscaped() {
         let locRow = LocRow(key: "nl_key", value: "abc\nabc")
         XCTAssertEqual("\"nl_key\" = \"abc\\nabc\";", locRow.localizableRow)
+    }
+    
+    func testNewLineIsEscaped2() {
+        let locRow = LocRow(key: "nl_key", value: "abc\nabc")
+        XCTAssertEqual(#""nl_key" = "abc\nabc";"#, locRow.localizableRow)
     }
     
     func testIntPositionArgumentsAreReplaced() {
