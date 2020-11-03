@@ -47,7 +47,12 @@ final class LocRowTests: XCTestCase {
         XCTAssertEqual("\"percent_key\" = \"%d %% percent\";", locRow.localizableRow)
     }
     
-    func testQuotesAreEscaped() {
+    func testKeyQuotesAreEscaped() {
+        let locRow = LocRow(key: "abc\"abc", value: "quotes_value")
+        XCTAssertEqual("\"abc\\\"abc\" = \"quotes_value\";", locRow.localizableRow)
+    }
+    
+    func testValueQuotesAreEscaped() {
         let locRow = LocRow(key: "quotes_key", value: "abc\"abc")
         XCTAssertEqual("\"quotes_key\" = \"abc\\\"abc\";", locRow.localizableRow)
     }
