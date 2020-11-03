@@ -8,10 +8,15 @@
 
 ## master
 
+## 1.1.3
+
+### Fixed
+- Fix creating invalid keys, if contain quote marks ([#22](https://github.com/AckeeCZ/ACKLocalization/pull/22))
+
 ## 1.1.2
 
 ### Fixed
-- Fix creating empty files when spreadsheet doesn't contain any plurals or only plurals ([#20](https://github.com/AckeeCZ/ACKLocalization/pull/17), kudos to @olejnjak)
+- Fix creating empty files when spreadsheet doesn't contain any plurals or only plurals ([#20](https://github.com/AckeeCZ/ACKLocalization/pull/20), kudos to @olejnjak)
 
 ## 1.1.1
 
