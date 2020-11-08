@@ -29,16 +29,14 @@ public struct LocRow {
 
     /// Key with replaced quotes
     private var normalizedKey: String {
-        return key
-            .replacingOccurrences(of: "\"", with: "\\\"")
+        key.replacingOccurrences(of: "\"", with: #"\""#)
     }
     
     /// Value with replaced placeholder arguments
     private var normalizedValue: String {
-        return value
-            .replacingOccurrences(of: "\"", with: "\\\"")
-            .replacingOccurrences(of: "\n", with: "\\n")
-            .replacingOccurrences(of: "\\u", with: "\\U")
+        value.replacingOccurrences(of: "\"", with: #"\""#)
+            .replacingOccurrences(of: "\n", with: #"\n"#)
+            .replacingOccurrences(of: "\\u", with: #"\U"#)
             .replacingOccurrences(of: "%s", with: "%@")
             .replacingOccurrences(of: "%", with: "%%")
             .replacingOccurrences(of: "%%@", with: "%@")
