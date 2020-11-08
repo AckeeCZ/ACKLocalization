@@ -8,6 +8,8 @@
 
 ## master
 
+## 1.1.3
+
 ### Fixed
 - Fix creating invalid keys, if contain quote marks ([#22](https://github.com/AckeeCZ/ACKLocalization/pull/22), kudos to @mateuszjablonski)
 
