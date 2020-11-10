@@ -192,10 +192,30 @@ public final class ACKLocalization {
         return plurals
     }
     
+    func writeSpecificFileValues(keyPrefix: String, rows: [LocRow], dirPath: String) throws {
+        // write values to appropriate files
+        var outputs = [String: [LocRow]]()
+        
+        rows.filter { $0.key.hasPrefix(keyPrefix + ".") }.forEach { row in
+            // key format for this type of entry is `plist.<plist_file_name>.<key>` or `src.<src_file_name>.<key>`
+            let components = row.key.components(separatedBy: ".")
+            
+            guard components.count > 2 else { return }
+
+            let fileName = components[1]
+            var rows = outputs[fileName] ?? []
+            rows.append(LocRow(key: components[2...].joined(separator: "."), value: row.value))
+            outputs[fileName] = rows
+        }
+        
+        try outputs.forEach { try writeRows($1, to: dirPath + "/" + $0 + ".strings") }
+    }
+    
     /// Saves given `mappedValues` to correct directory file
     public func saveMappedValues(_ mappedValues: MappedValues, directory: String, sourcesDirectory: String, stringsFileName: String, stringsDictFileName: String) throws {
         try mappedValues.forEach { langCode, rows in
-            let dirPath = directory + "/" + langCode + ".lproj"
+            let langCodePostfix = langCode + ".lproj"
+            let dirPath = directory + "/" + langCodePostfix
             let filePath = dirPath + "/" + stringsFileName
             let pluralsPath = dirPath + "/" + stringsDictFileName
             
@@ -210,27 +230,19 @@ public final class ACKLocalization {
                 let finalRows = rows
                     // we filter out entries with `plist.` prefix as they will be written into different file
                     .filter { !$0.key.hasPrefix(Constants.plistKeyPrefix + ".") }
+                    // we filter out entries with `src.` prefix as they will be written into different file
+                       .filter { !$0.key.hasPrefix(Constants.sourcesKeyPrefix + ".") }
                     // Filter out plurals
                     .filter { $0.key.range(of: Constants.pluralPattern, options: .regularExpression) == nil }
                 
                 try writeRows(finalRows, to: filePath)
                 
-                // write plist values to appropriate files
-                var plistOutputs = [String: [LocRow]]()
+                try writeSpecificFileValues(keyPrefix: Constants.plistKeyPrefix, rows: rows, dirPath: dirPath)
                 
-                rows.filter { $0.key.hasPrefix(Constants.plistKeyPrefix + ".") }.forEach { row in
-                    // key format for this type of entry is `plist.<plist_file_name>.<key>`
-                    let components = row.key.components(separatedBy: ".")
-                    
-                    guard components.count > 2 else { return }
-                    
-                    let plistName = components[1]
-                    var rows = plistOutputs[plistName] ?? []
-                    rows.append(LocRow(key: components[2...].joined(separator: "."), value: row.value))
-                    plistOutputs[plistName] = rows
+                if !sourcesDirectory.isEmpty {
+                    let srcPath = sourcesDirectory + "/" + langCodePostfix
+                    try writeSpecificFileValues(keyPrefix: Constants.sourcesKeyPrefix, rows: rows, dirPath: srcPath)
                 }
-                
-                try plistOutputs.forEach { try writeRows($1, to: dirPath + "/" + $0 + ".strings") }
                 
                 if plurals.count > 0 {
                     // Create stringDict from data and save it
