@@ -19,6 +19,9 @@ public struct Configuration: Decodable {
     /// Path to destination directory where generated strings files should be saved
     public let destinationDir: String
     
+    /// Path to sources directory where generated strings files should be saved
+    public let sourcesDir: String?
+    
     /// Name of column that contains keys to be localized
     public let keyColumnName: String
     
@@ -44,10 +47,11 @@ public struct Configuration: Decodable {
     /// Name of stringsDict file that should be generated
     public let stringsDictFileName: String?
     
-    public init(apiKey: APIKey?, destinationDir: String, keyColumnName: String, languageMapping: LanguageMapping, serviceAccount: String?,
+    public init(apiKey: APIKey?, destinationDir: String, sourcesDir: String?, keyColumnName: String, languageMapping: LanguageMapping, serviceAccount: String?,
                 spreadsheetID: String, spreadsheetTabName: String?, stringsFileName: String?, stringsDictFileName: String?) {
         self.apiKey = apiKey
         self.destinationDir = destinationDir
+        self.sourcesDir = sourcesDir
         self.keyColumnName = keyColumnName
         self.languageMapping = languageMapping
         self.serviceAccount = serviceAccount
