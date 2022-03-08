@@ -31,11 +31,10 @@ public struct AuthAPIService: AuthAPIServicing {
     public func fetchAccessToken(serviceAccount: ServiceAccount) -> AnyPublisher<AccessToken, RequestError> {
         let jwt = try? self.jwt(
             for: serviceAccount,
-               claims: claims(serviceAccount: serviceAccount, validFor: 60, readOnly: true)
+            claims: claims(serviceAccount: serviceAccount, validFor: 60)
         )
-        let url = URL(string: "https://oauth2.googleapis.com/token")!
         let requestData = AccessTokenRequest(assertion: jwt ?? "")
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: serviceAccount.tokenURL)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try? JSONEncoder().encode(requestData)
@@ -56,9 +55,14 @@ public struct AuthAPIService: AuthAPIServicing {
             return try signers.sign(claims)
         }
         
-        private func claims(serviceAccount sa: ServiceAccount, validFor interval: TimeInterval, readOnly: Bool) -> GoogleClaims {
+        private func claims(serviceAccount sa: ServiceAccount, validFor interval: TimeInterval) -> GoogleClaims {
             let now = Int(Date().timeIntervalSince1970)
 
-            return .init(serviceAccount: sa, scope: readOnly ? .readOnly : .readWrite, exp: now + Int(interval), iat: now)
+            return .init(
+                serviceAccount: sa,
+                scope: .readOnly,
+                exp: now + Int(interval),
+                iat: now
+            )
         }
 }
