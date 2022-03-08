@@ -8,6 +8,11 @@
 
 ## master
 
+## 1.2.0
+
+### Added
+- Add support for empty values for keys ([#26](https://github.com/AckeeCZ/ACKLocalization/pull/22), kudos to @olejnjak)
+
 ## 1.1.3
 
 ### Fixed
