@@ -8,7 +8,7 @@
 import Foundation
 
 /// Struct representing single `Localizable.strings` row
-public struct LocRow {
+public struct LocRow: Equatable {
     /// Key of current row
     public let key: String
     
