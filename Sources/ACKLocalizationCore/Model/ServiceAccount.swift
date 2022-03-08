@@ -12,18 +12,15 @@ public struct ServiceAccount: Decodable {
     enum CodingKeys: String, CodingKey {
         case clientEmail = "client_email"
         case privateKey = "private_key"
+        case tokenURL = "token_uri"
     }
     
     /// Email associated with the service account
-    public let clientEmail: String
+    let clientEmail: String
     
     /// Private key used to generate JWT token
-    public let privateKey: String
+    let privateKey: String
     
-    // MARK: - Initializers
-    
-    public init(clientEmail: String, privateKey: String) {
-        self.clientEmail = clientEmail
-        self.privateKey = privateKey
-    }
+    /// URL for fetching OAuth token
+    let tokenURL: URL
 }

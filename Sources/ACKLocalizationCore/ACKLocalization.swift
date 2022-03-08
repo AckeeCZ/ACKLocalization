@@ -103,12 +103,11 @@ public final class ACKLocalization {
                 // find index of current language
                 guard let langIndex = valueRange.firstIndex(columnName: sheetColName) else { return }
                 
-                // try to get value for current language
-                if let value = rowValues[safe: langIndex].map ({ LocRow(key: key, value: $0) }) {
-                    var langRows = result[langCode] ?? []
-                    langRows.append(value)
-                    result[langCode] = langRows
-                }
+                let value = LocRow(key: key, value: rowValues[safe: langIndex] ?? "")
+                
+                var langRows = result[langCode] ?? []
+                langRows.append(value)
+                result[langCode] = langRows
             }
         }
         

@@ -9,9 +9,6 @@ import Foundation
 
 /// Struct holding content of a single sheet
 public struct ValueRange: Decodable {
-    /// Represented range in sheet
-    public let range: String
-    
     /// String values in sheet
     public let values: [[String]]
     
@@ -22,8 +19,7 @@ public struct ValueRange: Decodable {
         values.first?.firstIndex(of: columnName)
     }
     
-    public init(range: String, values: [[String]]) {
-        self.range = range
+    public init(values: [[String]]) {
         self.values = values
     }
 }

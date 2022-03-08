@@ -18,14 +18,14 @@ let package = Package(
             targets: ["ACKLocalization"]),
     ],
     dependencies: [
-        .package(url:"https://github.com/IBM-Swift/Swift-JWT", .upToNextMajor(from: "3.6.1")),
+        .package(url:"https://github.com/vapor/jwt-kit", .upToNextMajor(from: "4.3.0")),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "ACKLocalizationCore",
-            dependencies: ["SwiftJWT"]),
+            dependencies: ["JWTKit"]),
         .target(
             name: "ACKLocalization",
             dependencies: ["ACKLocalizationCore"]),
