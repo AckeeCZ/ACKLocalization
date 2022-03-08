@@ -9,25 +9,6 @@ import Foundation
 import JWTKit
 
 /// Struct that is used for generating second part of JWT token
-//struct GoogleClaims: JWTPayload {
-//    /// Service account email
-//    let iss: String
-//
-//    /// Required scope
-//    let scope = "https://www.googleapis.com/auth/spreadsheets.readonly"
-//
-//    /// Desired auth endpoint
-//    let aud = "https://oauth2.googleapis.com/token"
-//
-//    /// Date of expiration timestamp
-//    let exp: Int
-//
-//    /// Issued at date timestamp
-//    let iat: Int
-//}
-
-
-/// Struct that is used for generating second part of JWT token
 struct GoogleClaims: JWTPayload {
     enum Scope: String, Codable {
         case readOnly = "https://www.googleapis.com/auth/spreadsheets.readonly"
