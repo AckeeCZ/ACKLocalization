@@ -7,7 +7,7 @@
 
 import Combine
 import Foundation
-import SwiftJWT
+import JWTKit
 
 /// Protocol wrapping a service that fetches an access token from further communication
 public protocol AuthAPIServicing {
@@ -29,9 +29,12 @@ public struct AuthAPIService: AuthAPIServicing {
     
     /// Fetch access token for given `serviceAccount`
     public func fetchAccessToken(serviceAccount: ServiceAccount) -> AnyPublisher<AccessToken, RequestError> {
-        let jwt = self.jwt(for: serviceAccount)
+        let jwt = try? self.jwt(
+            for: serviceAccount,
+               claims: claims(serviceAccount: serviceAccount, validFor: 60, readOnly: true)
+        )
         let url = URL(string: "https://oauth2.googleapis.com/token")!
-        let requestData = AccessTokenRequest(assertion: jwt)
+        let requestData = AccessTokenRequest(assertion: jwt ?? "")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -47,12 +50,15 @@ public struct AuthAPIService: AuthAPIServicing {
     // MARK: - Private helpers
     
     /// Create JWT token that will be sent to retrieve access token
-    private func jwt(for serviceAccount: ServiceAccount) -> String {
-        let header = Header(typ: "JWT")
-        let now = Int(Date().timeIntervalSince1970)
-        let claims = GoogleClaims(iss: serviceAccount.clientEmail, exp: now + 60, iat: now)
-        var jwt = JWT(header: header, claims: claims)
-        let signer = JWTSigner.rs256(privateKey: serviceAccount.privateKey.data(using: .utf8)!)
-        return (try? jwt.sign(using: signer)) ?? ""
-    }
+        private func jwt(for serviceAccount: ServiceAccount, claims: GoogleClaims) throws -> String {
+            let signers = JWTSigners()
+            try signers.use(.rs256(key: .private(pem: serviceAccount.privateKey)))
+            return try signers.sign(claims)
+        }
+        
+        private func claims(serviceAccount sa: ServiceAccount, validFor interval: TimeInterval, readOnly: Bool) -> GoogleClaims {
+            let now = Int(Date().timeIntervalSince1970)
+
+            return .init(serviceAccount: sa, scope: readOnly ? .readOnly : .readWrite, exp: now + Int(interval), iat: now)
+        }
 }
