@@ -98,7 +98,7 @@ Do you want to share secrets across multiple projects, or do you not want to kee
 `ACKLOCALIZATION_SERVICE_ACCOUNT_PATH` - Path to service account file that will be used to access spreadsheet
 `ACKLOCALIZATION_API_KEY` - API key that will be used to communicate with Google Sheets API
 
-`apiKey` or `serviceAccount` defined in `Configuration.json` have higher priority than environment values.
+`apiKey` or `serviceAccount` defined in `localization.json` have higher priority than environment values.
 If both are provided then `ACKLOCALIZATION_SERVICE_ACCOUNT_PATH` will be used. 
 
 ### Calling ACKLocalization
