@@ -288,7 +288,15 @@ public final class ACKLocalization {
                 let apiKey = APIKey(value: apiKey)
                 return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, apiKey: apiKey)
             } else {
-                throw LocalizationError(message: "Either `apiKey` or `serviceAccount` in `localization.json` file or environment variable must be provided.")
+                let errorMessage = """
+                Unable to load API key or service account path. Please check if:
+                
+                - `apiKey` or `serviceAccount` attribute is provided in `localization.json` file
+                or
+                - `\(Constants.apiKey)` or `\(Constants.serviceAccountPath)` environment variable is set
+                """
+                
+                throw LocalizationError(message: errorMessage)
             }
         } catch {
             switch error {
