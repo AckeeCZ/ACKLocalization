@@ -277,8 +277,18 @@ public final class ACKLocalization {
                 return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, serviceAccount: serviceAccount)
             } else if let apiKey = config.apiKey {
                 return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, apiKey: apiKey)
+            } else if let serviceAccountPath = ProcessInfo.processInfo.environment[Constants.serviceAccountPath] {
+                let serviceAccount = try loadServiceAccount(from: serviceAccountPath)
+                return fetchSheetValues(
+                    config.spreadsheetTabName,
+                    spreadsheetId: config.spreadsheetID,
+                    serviceAccount: serviceAccount
+                )
+            } else if let apiKey = ProcessInfo.processInfo.environment[Constants.apiKey] {
+                let apiKey = APIKey(value: apiKey)
+                return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, apiKey: apiKey)
             } else {
-                throw LocalizationError(message: "Either `apiKey` or `serviceAccount` must be provided in `localization.json` file")
+                throw LocalizationError(message: "Either `apiKey` or `serviceAccount` in `localization.json` file or environment variable must be provided.")
             }
         } catch {
             switch error {
