@@ -84,12 +84,22 @@ Attributes documentation:
 | `apiKey` | ❌ | API key that will be used to communicate with Google Sheets API, `apiKey` or `serviceAccount` has to be provided |
 | `serviceAccount` | ❌ | Path to service account file that will be used to access spreadsheet, `apiKey` or `serviceAccount` has to be provided |
 | `spreadsheetID` | ✅ | Identifier of spreadsheet that should be downloaded |
-| `spreadsheetTabName` | ❌ | Name of spreadsheet tab to be fetched, ff nothing is specified, we will use the first tab in spreadsheet |
+| `spreadsheetTabName` | ❌ | Name of spreadsheet tab to be fetched, if nothing is specified, we will use the first tab in spreadsheet |
 | `stringsFileName` | ❌ | Name of strings file that should be generated |
 
 The file has to be in the same directory where you call ACKLocalization.
 
-To be able to communicate with Google Sheets API, you need to provide either `apiKey` or `serviceAccount` parameter. If both are provided, then `serviceAccount` will be used.
+To be able to communicate with Google Sheets API, you need to provide either `apiKey` or `serviceAccount` parameter or [use environment variable](#environment-variables). If both are provided, then `serviceAccount` will be used.
+
+### Environment variables
+
+Do you want to share secrets across multiple projects, or do you not want to keep secrets in the project repository? We have the solution for you. Just set one of the environment variables below.
+
+`ACKLOCALIZATION_SERVICE_ACCOUNT_PATH` - Path to service account file that will be used to access spreadsheet
+`ACKLOCALIZATION_API_KEY` - API key that will be used to communicate with Google Sheets API
+
+`apiKey` or `serviceAccount` defined in `localization.json` have higher priority than environment values.
+If both are provided then `ACKLOCALIZATION_SERVICE_ACCOUNT_PATH` will be used. 
 
 ### Calling ACKLocalization
 

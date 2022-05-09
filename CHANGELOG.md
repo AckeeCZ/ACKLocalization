@@ -8,6 +8,9 @@
 
 ## master
 
+### Added
+- Add support for loading secrets from environment variables ([#29](https://github.com/AckeeCZ/ACKLocalization/pull/29), kudos to @leinhauplk)
+
 ## 1.2.0
 
 ### Added
