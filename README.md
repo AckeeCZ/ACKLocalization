@@ -139,8 +139,6 @@ This is example structure of the spreadsheet with translations
 |---------|-------|------|
 | hello   | Hello | Ahoj |
 
-ACKLocalization also now supports plist files. Simply prefix the key with plist.NameOfPlist - please note that NameOfPlist is case-sensitive.
-
 #### Example config file for this case would be
 
 This is the example config file:
@@ -159,17 +157,42 @@ This is the example config file:
 }
 ```
 
+### Plist keys
+
+ACKLocalization supports localizing plist files. Simply prefix the key with `plist.InfoPlist`, where `InfoPlist` is the name of plist you need to localize and ACKLocalization will automatically generate respective `InfoPlist.strings` files. Please note that `InfoPlist` name is case-sensitive.
+
+Example keys:
+
+```
+plist.InfoPlist.NSPhotoLibraryAddUsageDescription
+plist.InfoPlist.NSUserTrackingUsageDescription
+```
+
+`InfoPlist.strings` result:
+
+```
+"NSPhotoLibraryAddUsageDescription" = "Your photo library usage message.";
+"NSUserTrackingUsageDescription" = "Your tracking permission message.";
+```
+
 ### Plural keys
 
-To add plurals to the spreadsheet you need to specify the translation key and the plural type in the following convention
+To add plurals to the spreadsheet, you need to specify the translation key and the plural type using the following [native convention](https://developer.apple.com/documentation/xcode/localizing-strings-that-contain-plurals):
 
 ```
 translation.key##{zero}
 translation.key##{one}
 translation.key##{two}
+translation.key##{few}
+translation.key##{many}
+translation.key##{other}
 ```
 
 This will be automatically generated into `Localizable.stringsDict` and the key won't be presented in `Localizable.strings`.
+
+Example:
+
+![ackee|ACKLocalization](Resources/plurals-example.png)
 
 ## Author
 
