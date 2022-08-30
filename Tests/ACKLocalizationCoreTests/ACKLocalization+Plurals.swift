@@ -98,6 +98,7 @@ final class ACKLocalizationPluralsTests: XCTestCase {
     }
     
     func testPluralWithStringFormatSpecifier() throws {
+        // Given
         let rows = [
             LocRow(key: "key##{many}", value: "%d many"),
         ]
@@ -113,18 +114,18 @@ final class ACKLocalizationPluralsTests: XCTestCase {
         let expectedResultEncoded = try JSONSerialization
             .data(withJSONObject: expectedResult, options: .sortedKeys)
         
-        
-        let plurals = try! ackLocalization.buildPlurals(from: rows)
-        XCTAssertEqual(plurals.count, 1)
-        
+        // When
+        let plurals = try ackLocalization.buildPlurals(from: rows)
         let encoder = JSONEncoder()
         encoder.outputFormatting = .sortedKeys
         let encodedData = try encoder.encode(plurals.first?.value)
         
+        // Then
         XCTAssertEqual(encodedData, expectedResultEncoded)
     }
     
     func testPluralWithIntegerFormatSpecifier() throws {
+        // Given
         let rows = [
             LocRow(key: "key##{many}", value: "%s many"),
         ]
@@ -140,13 +141,13 @@ final class ACKLocalizationPluralsTests: XCTestCase {
         let expectedResultEncoded = try JSONSerialization
             .data(withJSONObject: expectedResult, options: .sortedKeys)
         
-        let plurals = try! ackLocalization.buildPlurals(from: rows)
-        XCTAssertEqual(plurals.count, 1)
-        
+        // When
+        let plurals = try ackLocalization.buildPlurals(from: rows)
         let encoder = JSONEncoder()
         encoder.outputFormatting = .sortedKeys
         let encodedData = try encoder.encode(plurals.first?.value)
         
+        // Then
         XCTAssertEqual(encodedData, expectedResultEncoded)
     }
 }
