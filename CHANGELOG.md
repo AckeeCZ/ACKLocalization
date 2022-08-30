@@ -8,6 +8,9 @@
 
 ## master
 
+### Added
+- Add support for formatted plurals ([#33](https://github.com/AckeeCZ/ACKLocalization/pull/33), kudos to @leinhauplk)
+
 ## 1.3.0
 
 ### Added
