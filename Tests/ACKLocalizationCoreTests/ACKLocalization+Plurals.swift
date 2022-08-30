@@ -96,4 +96,57 @@ final class ACKLocalizationPluralsTests: XCTestCase {
             XCTAssertEqual(error as? PluralError, PluralError.invalidPluralRule(rows[0].key))
         }
     }
+    
+    func testPluralWithStringFormatSpecifier() throws {
+        let rows = [
+            LocRow(key: "key##{many}", value: "%d many"),
+        ]
+        
+        let expectedResult: [String: Encodable] = [
+            "NSStringLocalizedFormatKey": "%#@inner@",
+            "inner": [
+                "NSStringFormatSpecTypeKey": "NSStringPluralRuleType",
+                "NSStringFormatValueTypeKey": "d",
+                "many": "%d many"
+            ]
+        ]
+        let expectedResultEncoded = try JSONSerialization
+            .data(withJSONObject: expectedResult, options: .sortedKeys)
+        
+        
+        let plurals = try! ackLocalization.buildPlurals(from: rows)
+        XCTAssertEqual(plurals.count, 1)
+        
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        let encodedData = try encoder.encode(plurals.first?.value)
+        
+        XCTAssertEqual(encodedData, expectedResultEncoded)
+    }
+    
+    func testPluralWithIntegerFormatSpecifier() throws {
+        let rows = [
+            LocRow(key: "key##{many}", value: "%s many"),
+        ]
+        
+        let expectedResult: [String: Encodable] = [
+            "NSStringLocalizedFormatKey": "%1$#@inner@",
+            "inner": [
+                "NSStringFormatSpecTypeKey": "NSStringPluralRuleType",
+                "NSStringFormatValueTypeKey": "d",
+                "many": "%2$@ many"
+            ]
+        ]
+        let expectedResultEncoded = try JSONSerialization
+            .data(withJSONObject: expectedResult, options: .sortedKeys)
+        
+        let plurals = try! ackLocalization.buildPlurals(from: rows)
+        XCTAssertEqual(plurals.count, 1)
+        
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        let encodedData = try encoder.encode(plurals.first?.value)
+        
+        XCTAssertEqual(encodedData, expectedResultEncoded)
+    }
 }
