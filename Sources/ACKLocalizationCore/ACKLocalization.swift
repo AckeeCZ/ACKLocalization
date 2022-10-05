@@ -192,60 +192,100 @@ public final class ACKLocalization {
     }
     
     /// Saves given `mappedValues` to correct directory file
-    public func saveMappedValues(_ mappedValues: MappedValues, directory: String, stringsFileName: String, stringsDictFileName: String) throws {
-        try mappedValues.forEach { langCode, rows in
-            let dirPath = directory + "/" + langCode + ".lproj"
-            let filePath = dirPath + "/" + stringsFileName
-            let pluralsPath = dirPath + "/" + stringsDictFileName
+    public func saveMappedValues(
+        _ mappedValues: MappedValues,
+        defaultFileName: String,
+        destinations: [String: String]
+    ) throws {
+        struct RowsPerFile {
+            let language: String
+            let fileName: String
+            let rows: [LocRow]
+        }
+        
+        let defaultFileName = defaultFileName.removingSuffix(".strings")
+            .removingSuffix(".stringsdict")
+        let rowsPerFile = mappedValues.flatMap { langCode, rows in
+             let fileGroups = [String: [LocRow]](grouping: rows) { row in
+                let keyComponents = row.key.components(separatedBy: ".")
+                
+                guard
+                    row.key.hasPrefix(Constants.plistKeyPrefix + "."),
+                    keyComponents.count > 2
+                else {
+                    return defaultFileName
+                }
+                
+                return keyComponents[1]
+            }
             
-            try? FileManager.default.removeItem(atPath: filePath)
+            return fileGroups.map { fileName, rows in
+                RowsPerFile(
+                    language: langCode,
+                    fileName: fileName,
+                    rows: rows.map { row in
+                        let keyComponents = row.key.components(separatedBy: ".")
+                        
+                        if row.key.hasPrefix(Constants.plistKeyPrefix + "."),
+                           keyComponents.count > 2 {
+                            return LocRow(
+                                key: keyComponents[2...].joined(separator: "."),
+                                value: row.value
+                            )
+                        }
+                        
+                        return row
+                    }
+                )
+            }
+        }
+        
+        let defaultDestination = destinations[defaultFileName]
+        
+        if defaultDestination == nil {
+            warn("No destination for default strings file '\(defaultFileName)'")
+            warn("This means that all keys in localization sheet need to have file specified (using `plist.<filename>.` prefix) an all such files need to have its path defined in `destinations` dictionary")
+        }
+        
+        try rowsPerFile.forEach { fileRows in
+            guard let path = destinations[fileRows.fileName] ?? defaultDestination else {
+                warn("No destination path found for '\(fileRows.fileName)' strings file")
+                return
+            }
+            
+            let dirPath = ((path as NSString).expandingTildeInPath as NSString)
+                .appendingPathComponent(fileRows.language + ".lproj")
+            
             try? FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true)
-
-            do {
-                // Collection of plural rules for a given translation key.
-                // Translation key is the base without the suffix ##{plural-rule}
-                let plurals = try buildPlurals(from: rows)
-                
-                let finalRows = rows
-                    // we filter out entries with `plist.` prefix as they will be written into different file
-                    .filter { !$0.key.hasPrefix(Constants.plistKeyPrefix + ".") }
-                    // Filter out plurals
-                    .filter { $0.key.range(of: Constants.pluralPattern, options: .regularExpression) == nil }
-                
-                try writeRows(finalRows, to: filePath)
-                
-                // write plist values to appropriate files
-                var plistOutputs = [String: [LocRow]]()
-                
-                rows.filter { $0.key.hasPrefix(Constants.plistKeyPrefix + ".") }.forEach { row in
-                    // key format for this type of entry is `plist.<plist_file_name>.<key>`
-                    let components = row.key.components(separatedBy: ".")
-                    
-                    guard components.count > 2 else { return }
-                    
-                    let plistName = components[1]
-                    var rows = plistOutputs[plistName] ?? []
-                    rows.append(LocRow(key: components[2...].joined(separator: "."), value: row.value))
-                    plistOutputs[plistName] = rows
-                }
-                
-                try plistOutputs.forEach { try writeRows($1, to: dirPath + "/" + $0 + ".strings") }
-                
-                if plurals.count > 0 {
-                    // Create stringDict from data and save it
-                    let encoder = PropertyListEncoder()
-                    encoder.outputFormat = .xml
-                    let data = try encoder.encode(plurals)
-                    try data.write(to: URL(fileURLWithPath: pluralsPath))
-                }
-            } catch {
-                throw LocalizationError(message: "Unable to save mapped values - " + error.localizedDescription)
+            
+            let stringsPath = (dirPath as NSString)
+                .appendingPathComponent(fileRows.fileName + ".strings")
+            
+            // Collection of plural rules for a given translation key.
+            // Translation key is the base without the suffix ##{plural-rule}
+            let plurals = try buildPlurals(from: fileRows.rows)
+            let nonPlurals = fileRows.rows.filter { !$0.isPlural }
+            
+            try writeRows(nonPlurals, to: stringsPath)
+            
+            if !plurals.isEmpty {
+                let stringsDictPath = (dirPath as NSString)
+                    .appendingPathComponent(fileRows.fileName + ".stringsdict")
+                // Create stringDict from data and save it
+                let encoder = PropertyListEncoder()
+                encoder.outputFormat = .xml
+                let data = try encoder.encode(plurals)
+                try data.write(to: URL(fileURLWithPath: stringsDictPath))
             }
         }
     }
     
     /// Saves given `mappedValues` to correct directory file
-    public func saveMappedValuesPublisher(_ mappedValues: MappedValues, directory: String, stringsFileName: String, stringsDictFileName: String) -> AnyPublisher<Void, LocalizationError> {
+    public func saveMappedValuesPublisher(
+        _ mappedValues: MappedValues,
+        defaultFileName: String,
+        destinations: [String: String]
+    ) -> AnyPublisher<Void, LocalizationError> {
         Future { [weak self] promise in
             guard let self = self else {
                 promise(.failure(LocalizationError(message: "Unable to save mapped values")))
@@ -253,7 +293,11 @@ public final class ACKLocalization {
             }
             
             do {
-                try self.saveMappedValues(mappedValues, directory: directory, stringsFileName: stringsFileName, stringsDictFileName: stringsDictFileName)
+                try self.saveMappedValues(
+                    mappedValues,
+                    defaultFileName: defaultFileName,
+                    destinations: destinations
+                )
                 promise(.success(()))
             } catch {
                 switch error {
@@ -265,8 +309,15 @@ public final class ACKLocalization {
     }
     
     /// Saves given `mappedValues` to correct directory file
-    public func saveMappedValuesPublisher(_ mappedValues: MappedValues, config: Configuration) -> AnyPublisher<Void, LocalizationError> {
-        saveMappedValuesPublisher(mappedValues, directory: config.destinationDir, stringsFileName: config.stringsFileName ?? "Localizable.strings", stringsDictFileName: config.stringsDictFileName ?? "Localizable.stringsdict")
+    public func saveMappedValuesPublisher(
+        _ mappedValues: MappedValues,
+        config: Configuration
+    ) -> AnyPublisher<Void, LocalizationError> {
+        saveMappedValuesPublisher(
+            mappedValues,
+            defaultFileName: config.defaultFileName,
+            destinations: config.destinations
+        )
     }
     
     /// Fetches sheet values from given `config`
@@ -316,10 +367,19 @@ public final class ACKLocalization {
             throw LocalizationError(message: "Unable to find `localization.json` config file. Does it exist in current directory?")
         }
         
+        let decoder = JSONDecoder()
+        
         do {
-            return try JSONDecoder().decode(Configuration.self, from: configData)
+            return try decoder.decode(Configuration.self, from: configData)
         } catch {
-            throw LocalizationError(message: "Unable to read `localization.json` - " + error.localizedDescription)
+            // For backwards compatibility we will try to decode old version of Configuration
+            // if that fails we will throw error with original message as we wanna encourage
+            // usage of latest Configuration version
+            if let v1Config = try? decoder.decode(ConfigurationV1.self, from: configData) {
+                return Configuration(v1Config: v1Config)
+            } else {
+                throw LocalizationError(message: "Unable to read `localization.json` - " + error.localizedDescription)
+            }
         }
     }
     
@@ -370,4 +430,19 @@ public final class ACKLocalization {
             exit(1)
         }
     }
+}
+
+extension String {
+    func removingSuffix(_ suffix: String) -> String {
+        guard hasSuffix(suffix) else { return self }
+        
+        return String(self[...index(endIndex, offsetBy: -suffix.count)])
+    }
+}
+
+/// Prints warning
+///
+/// Simple solution for now, later on we might wanna use something bit more robust and testable
+func warn(_ message: String) {
+    print("⚠️", message)
 }
