@@ -8,6 +8,9 @@
 
 ## master
 
+## Added 
+- Add support to define destination for all files that are generated ([#34](https://github.com/AckeeCZ/ACKLocalization/pull/33), kudos to @leinhauplk)
+
 ## 1.4.0
 
 ### Added
