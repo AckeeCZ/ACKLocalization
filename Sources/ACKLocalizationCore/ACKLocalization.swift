@@ -258,15 +258,16 @@ public final class ACKLocalization {
             
             try? FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true)
             
-            let stringsPath = (dirPath as NSString)
-                .appendingPathComponent(fileRows.fileName + ".strings")
-            
             // Collection of plural rules for a given translation key.
             // Translation key is the base without the suffix ##{plural-rule}
             let plurals = try buildPlurals(from: fileRows.rows)
             let nonPlurals = fileRows.rows.filter { !$0.isPlural }
             
-            try writeRows(nonPlurals, to: stringsPath)
+            if !nonPlurals.isEmpty {
+                let stringsPath = (dirPath as NSString)
+                    .appendingPathComponent(fileRows.fileName + ".strings")
+                try writeRows(nonPlurals, to: stringsPath)
+            }
             
             if !plurals.isEmpty {
                 let stringsDictPath = (dirPath as NSString)
