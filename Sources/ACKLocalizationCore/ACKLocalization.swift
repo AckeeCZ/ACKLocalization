@@ -244,7 +244,7 @@ public final class ACKLocalization {
         
         if defaultDestination == nil {
             warn("No destination for default strings file '\(defaultFileName)'")
-            warn("This means that all keys in localization sheet need to have file specified (using `plist.<filename>.` prefix) an all such files need to have its path defined in `destinations` dictionary")
+            warn("This means that all keys in localization sheet need to have file specified (using `plist.<filename>.` prefix) and all such files need to have its path defined in `destinations` dictionary")
         }
         
         try rowsPerFile.forEach { fileRows in
