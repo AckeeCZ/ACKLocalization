@@ -8,8 +8,14 @@
 
 ## master
 
+## 1.5.0
+
 ## Added 
-- Add support to define destination for all files that are generated ([#34](https://github.com/AckeeCZ/ACKLocalization/pull/33), kudos to @leinhauplk)
+- Add support to define destination for all files that are generated ([#34](https://github.com/AckeeCZ/ACKLocalization/pull/34), kudos to @olejnjak)
+- Generate localizations even for items that have empty value ([#34](https://github.com/AckeeCZ/ACKLocalization/pull/34), kudos to @olejnjak)
+
+## Changed
+- **BREAKING**: Configuration field `stringsDictFileName` has no more effect, from now on stringsdicts are generated alongside corresponding stringsfile ([#34](https://github.com/AckeeCZ/ACKLocalization/pull/34), kudos to @olejnjak)
 
 ## 1.4.0
 
