@@ -62,15 +62,17 @@ The file is named `localization.json`. This is how example file looks like, you 
 
 ```json
 {
-    "destinationDir": "Resources",
+    "defaultFileName": "Localizable",
+    "destinations": {
+        "Localizable": "Framework/Resources",
+        "InfoPlist": "App/Resources"
+    },
     "keyColumnName": "iOS",
     "languageMapping": {
         "CZ": "cs"
     },
     "serviceAccount": "Resources/ServiceAccount.json",
     "spreadsheetID": "<GOOGLE_SPREADSHEET_ID>",
-    "stringsFileName": "Localizable.strings",
-    "spreadsheetTabName": "Localizations"
 }
 ```
 
@@ -78,14 +80,14 @@ Attributes documentation:
 
 | Name | Required | Note |
 | ---- | -------- | ---- |
-| `destinationDir` | ✅ | Path to destination directory where generated strings files should be saved |
+| `defaultFileName` | ✅ | Name of default strings(dict) file |
+| `destinations` | ✅ | Dictionary of destinations for all generated files (at least entry with  `defaultFileName` is required), if you use `plist.<filename>.` prefix in your sheet, you might wanna add those entries as well, otherwise they will be generated alongside the default file |
 | `keyColumnName` | ✅ | Name of column that contains keys to be localized |
 | `languageMapping` | ✅ | Mapping of language column names to app languages, you specify how columns in spreasheet should be mapped to app languages |
 | `apiKey` | ❌ | API key that will be used to communicate with Google Sheets API, `apiKey` or `serviceAccount` has to be provided |
 | `serviceAccount` | ❌ | Path to service account file that will be used to access spreadsheet, `apiKey` or `serviceAccount` has to be provided |
 | `spreadsheetID` | ✅ | Identifier of spreadsheet that should be downloaded |
 | `spreadsheetTabName` | ❌ | Name of spreadsheet tab to be fetched, if nothing is specified, we will use the first tab in spreadsheet |
-| `stringsFileName` | ❌ | Name of strings file that should be generated |
 
 The file has to be in the same directory where you call ACKLocalization.
 
@@ -120,9 +122,15 @@ This is example folder structure of the project
 |-localization.json
 |-Podfile
 |-Project.xcodeproj
-|-Project
+|-ServiceAccount.json
+|-App
 |---Resources
-|------ServiceAccount.json
+|------en.lproj
+|----------InfoPlist.strings
+|------cs.lproj
+|----------InfoPlist.strings
+|-Framework
+|---Resources
 |------en.lproj
 |----------Localizable.strings
 |----------Localizable.stringsDict
@@ -138,13 +146,18 @@ This is example structure of the spreadsheet with translations
 | key_ios | EN    | CS   |
 |---------|-------|------|
 | hello   | Hello | Ahoj |
+| plist.InfoPlist.NSCameraUsageDescription | Cammera usage description | Popis využití kamery |
 
 #### Example config file for this case would be
 
 This is the example config file:
 ```json
 {
-    "destinationDir": "Resources",
+    "defaultFileName": "Localizable",
+    "destinations": {
+        "Localizable": "Framework/Resources",
+        "InfoPlist": "App/Resources"
+    },
     "keyColumnName": "key_ios",
     "languageMapping": {
         "CS": "cs",
@@ -152,7 +165,6 @@ This is the example config file:
     },
     "serviceAccount": "Resources/ServiceAccount.json",
     "spreadsheetID": "<GOOGLE_SPREADSHEET_ID>",
-    "stringsFileName": "Localizable.strings",
     "spreadsheetTabName": "Localizations"
 }
 ```

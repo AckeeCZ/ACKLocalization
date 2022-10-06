@@ -18,6 +18,11 @@ public struct LocRow: Equatable {
     /// Representation that can be used as row in strings file
     public var localizableRow: String { return "\"" + normalizedKey + "\" = \"" + normalizedValue + "\";" }
     
+    /// Checks if key contains plural pattern
+    public var isPlural: Bool {
+        key.range(of: Constants.pluralPattern, options: .regularExpression) != nil
+    }
+    
     // MARK: - Initializers
     
     public init(key: String, value: String) {
