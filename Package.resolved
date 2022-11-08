@@ -29,15 +29,6 @@
         }
       },
       {
-        "package": "jwt-kit",
-        "repositoryURL": "https://github.com/vapor/jwt-kit",
-        "state": {
-          "branch": null,
-          "revision": "1822bb0abf0a31a4b5078ec19061c548835253b5",
-          "version": "4.3.0"
-        }
-      },
-      {
         "package": "swift-atomics",
         "repositoryURL": "https://github.com/apple/swift-atomics.git",
         "state": {
@@ -53,15 +44,6 @@
           "branch": null,
           "revision": "f504716c27d2e5d4144fa4794b12129301d17729",
           "version": "1.0.3"
-        }
-      },
-      {
-        "package": "swift-crypto",
-        "repositoryURL": "https://github.com/apple/swift-crypto.git",
-        "state": {
-          "branch": null,
-          "revision": "a8911e0fadc25aef1071d582355bd1037a176060",
-          "version": "2.0.4"
         }
       },
       {
