@@ -332,7 +332,11 @@ public final class ACKLocalization {
                     serviceAccount: serviceAccount
                 )
             } else if let apiKey = config.apiKey {
-                return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, apiKey: apiKey)
+                return fetchSheetValues(
+                    config.spreadsheetTabName,
+                    spreadsheetId: config.spreadsheetID,
+                    apiKey: apiKey
+                )
             } else if let serviceAccountPath = ProcessInfo.processInfo.environment[Constants.serviceAccountPath] {
                 let serviceAccount = try loadServiceAccount(from: serviceAccountPath)
                 return fetchSheetValues(
@@ -342,7 +346,11 @@ public final class ACKLocalization {
                 )
             } else if let apiKey = ProcessInfo.processInfo.environment[Constants.apiKey] {
                 let apiKey = APIKey(value: apiKey)
-                return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, apiKey: apiKey)
+                return fetchSheetValues(
+                    config.spreadsheetTabName,
+                    spreadsheetId: config.spreadsheetID,
+                    apiKey: apiKey
+                )
             } else {
                 let errorMessage = """
                 Unable to load API key or service account path. Please check if:

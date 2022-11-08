@@ -18,7 +18,10 @@ let package = Package(
             targets: ["ACKLocalization"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/googleapis/google-auth-library-swift", from: "0.5.2"),
+        .package(
+            url: "https://github.com/googleapis/google-auth-library-swift",
+            .upToNextMajor(from: "0.5.2")
+        ),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
