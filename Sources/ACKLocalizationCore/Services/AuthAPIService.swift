@@ -8,11 +8,12 @@
 import Combine
 import Foundation
 import JWTKit
+import OAuth2
 
 /// Protocol wrapping a service that fetches an access token from further communication
 public protocol AuthAPIServicing {
     /// Fetch access token for given `serviceAccount`
-    func fetchAccessToken(serviceAccount: ServiceAccount) -> AnyPublisher<AccessToken, RequestError>
+    func fetchAccessToken(serviceAccount: Data) -> AnyPublisher<AccessToken, RequestError>
 }
 
 /// Service that fetches an access token from further communication
