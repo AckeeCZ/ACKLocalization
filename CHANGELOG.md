@@ -8,6 +8,9 @@
 
 ## master
 
+### Added
+- Replaces custom solution for getting auth credentials with [google auth library](https://github.com/googleapis/google-auth-library-swift) ([#29](https://github.com/AckeeCZ/ACKLocalization/pull/36), kudos to @babacros)
+
 ## 1.5.0
 
 ## Added 
