@@ -7,9 +7,10 @@
 
 import ACKLocalizationCore
 import Combine
+import Foundation
 
 final class AuthAPIServiceMock: AuthAPIServicing {
-    func fetchAccessToken(serviceAccount: ServiceAccount) -> AnyPublisher<AccessToken, RequestError> {
+    func fetchAccessToken(serviceAccount: Data) -> AnyPublisher<AccessToken, RequestError> {
         Empty().eraseToAnyPublisher()
     }
 }

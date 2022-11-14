@@ -60,7 +60,7 @@ public final class ACKLocalization {
     /// Fetches content of given sheet from spreadsheet using given `serviceAccount`
     ///
     /// If not `spreadsheetTabName` is provided, the first in the spreadsheet is used
-    public func fetchSheetValues(_ spreadsheetTabName: String?, spreadsheetId: String, serviceAccount: ServiceAccount) -> AnyPublisher<ValueRange, LocalizationError> {
+    public func fetchSheetValues(_ spreadsheetTabName: String?, spreadsheetId: String, serviceAccount: Data) -> AnyPublisher<ValueRange, LocalizationError> {
         let sheetsAPI = self.sheetsAPI
         
         return authAPI.fetchAccessToken(serviceAccount: serviceAccount)
@@ -326,9 +326,17 @@ public final class ACKLocalization {
         do {
             if let serviceAccountPath = config.serviceAccount {
                 let serviceAccount = try loadServiceAccount(from: serviceAccountPath)
-                return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, serviceAccount: serviceAccount)
+                return fetchSheetValues(
+                    config.spreadsheetTabName,
+                    spreadsheetId: config.spreadsheetID,
+                    serviceAccount: serviceAccount
+                )
             } else if let apiKey = config.apiKey {
-                return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, apiKey: apiKey)
+                return fetchSheetValues(
+                    config.spreadsheetTabName,
+                    spreadsheetId: config.spreadsheetID,
+                    apiKey: apiKey
+                )
             } else if let serviceAccountPath = ProcessInfo.processInfo.environment[Constants.serviceAccountPath] {
                 let serviceAccount = try loadServiceAccount(from: serviceAccountPath)
                 return fetchSheetValues(
@@ -338,16 +346,20 @@ public final class ACKLocalization {
                 )
             } else if let apiKey = ProcessInfo.processInfo.environment[Constants.apiKey] {
                 let apiKey = APIKey(value: apiKey)
-                return fetchSheetValues(config.spreadsheetTabName, spreadsheetId: config.spreadsheetID, apiKey: apiKey)
+                return fetchSheetValues(
+                    config.spreadsheetTabName,
+                    spreadsheetId: config.spreadsheetID,
+                    apiKey: apiKey
+                )
             } else {
                 let errorMessage = """
                 Unable to load API key or service account path. Please check if:
-                
+
                 - `apiKey` or `serviceAccount` attribute is provided in `localization.json` file
                 or
                 - `\(Constants.apiKey)` or `\(Constants.serviceAccountPath)` environment variable is set
                 """
-                
+
                 throw LocalizationError(message: errorMessage)
             }
         } catch {
@@ -385,16 +397,16 @@ public final class ACKLocalization {
     }
     
     /// Loads service account from given `config`
-    private func loadServiceAccount(from path: String) throws -> ServiceAccount {
+    private func loadServiceAccount(from path: String) throws -> Data {
         guard let serviceAccountData = FileManager.default.contents(atPath: path) else {
             throw LocalizationError(message: "Unable to load service account at " + path)
         }
-        
-        do {
-            return try JSONDecoder().decode(ServiceAccount.self, from: serviceAccountData)
-        } catch {
-            throw LocalizationError(message: "Unable to read service account from `" + path + "` - " + error.localizedDescription)
+
+        guard !serviceAccountData.isEmpty else {
+            throw LocalizationError(message: "Invalid service account data")
         }
+        
+        return serviceAccountData
     }
     
     /// Actually writes given `rows` to given `file`

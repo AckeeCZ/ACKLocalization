@@ -7,12 +7,12 @@
 
 import Combine
 import Foundation
-import JWTKit
+import OAuth2
 
 /// Protocol wrapping a service that fetches an access token from further communication
 public protocol AuthAPIServicing {
     /// Fetch access token for given `serviceAccount`
-    func fetchAccessToken(serviceAccount: ServiceAccount) -> AnyPublisher<AccessToken, RequestError>
+    func fetchAccessToken(serviceAccount: Data) -> AnyPublisher<AccessToken, RequestError>
 }
 
 /// Service that fetches an access token from further communication
@@ -28,41 +28,36 @@ public struct AuthAPIService: AuthAPIServicing {
     // MARK: - API calls
     
     /// Fetch access token for given `serviceAccount`
-    public func fetchAccessToken(serviceAccount: ServiceAccount) -> AnyPublisher<AccessToken, RequestError> {
-        let jwt = try? self.jwt(
-            for: serviceAccount,
-            claims: claims(serviceAccount: serviceAccount, validFor: 60)
-        )
-        let requestData = AccessTokenRequest(assertion: jwt ?? "")
-        var request = URLRequest(url: serviceAccount.tokenURL)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try? JSONEncoder().encode(requestData)
+    public func fetchAccessToken(serviceAccount: Data) -> AnyPublisher<AccessToken, RequestError> {
+        Deferred {
+            Future<AccessToken, RequestError> { promise in
+                guard let tokenProvider = ServiceAccountTokenProvider(
+                    credentialsData: serviceAccount,
+                    scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+                ) else {
+                    promise(.failure(.init(message: "Creating provider failed")))
+                    return
+                }
 
-        return session.dataTaskPublisher(for: request)
-            .validate()
-            .decode(type: AccessToken.self, decoder: JSONDecoder())
-            .mapError(RequestError.init)
-            .eraseToAnyPublisher()
+                do {
+                    try tokenProvider.withToken { token, error in
+                        if let token = token, let accessToken = token.AccessToken {
+                            let token = AccessToken(
+                                accessToken: accessToken,
+                                expiration: TimeInterval(token.ExpiresIn ?? 0),
+                                type: token.TokenType ?? ""
+                            )
+                            promise(.success(token))
+                        } else if let error {
+                            promise(.failure(.init(underlyingError: error, message: "Retrieving access token failed")))
+                        } else {
+                            promise(.failure(.init(message: "Access token was not provided")))
+                        }
+                    }
+                } catch {
+                    promise(.failure(.init(underlyingError: error, message: "Retrieving access token failed")))
+                }
+            }
+        }.eraseToAnyPublisher()
     }
-    
-    // MARK: - Private helpers
-    
-    /// Create JWT token that will be sent to retrieve access token
-        private func jwt(for serviceAccount: ServiceAccount, claims: GoogleClaims) throws -> String {
-            let signers = JWTSigners()
-            try signers.use(.rs256(key: .private(pem: serviceAccount.privateKey)))
-            return try signers.sign(claims)
-        }
-        
-        private func claims(serviceAccount sa: ServiceAccount, validFor interval: TimeInterval) -> GoogleClaims {
-            let now = Int(Date().timeIntervalSince1970)
-
-            return .init(
-                serviceAccount: sa,
-                scope: .readOnly,
-                exp: now + Int(interval),
-                iat: now
-            )
-        }
 }
