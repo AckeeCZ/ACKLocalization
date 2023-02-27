@@ -413,7 +413,7 @@ public final class ACKLocalization {
     private func writeRows(_ rows: [LocRow], to file: String) throws {
         guard rows.count > 0 else { return }
 
-        try checkDuplicatedKeys(form: rows)
+        try checkDuplicateKeys(form: rows)
 
         try rows.map { $0.localizableRow }
             .joined(separator: "\n")
@@ -421,9 +421,9 @@ public final class ACKLocalization {
     }
 
     /// Check if given `rows` have a duplicated keys
-    public func checkDuplicatedKeys(form rows: [LocRow]) throws {
+    public func checkDuplicateKeys(form rows: [LocRow]) throws {
         let keys = rows.map { $0.key }
-        let uniqueKeys = Set(rows.map { $0.key })
+        let uniqueKeys = Set(keys)
 
         if keys.count != uniqueKeys.count {
             let duplicates = Dictionary(grouping: rows, by: \.key)
