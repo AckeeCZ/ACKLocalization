@@ -412,12 +412,26 @@ public final class ACKLocalization {
     /// Actually writes given `rows` to given `file`
     private func writeRows(_ rows: [LocRow], to file: String) throws {
         guard rows.count > 0 else { return }
-        
+
+        try checkDuplicateKeys(form: rows)
+
         try rows.map { $0.localizableRow }
             .joined(separator: "\n")
             .write(toFile: file, atomically: true, encoding: .utf8)
     }
-    
+
+    /// Check if given `rows` have a duplicate keys
+    public func checkDuplicateKeys(form rows: [LocRow]) throws {
+        let keys = rows.map { $0.key }
+        let uniqueKeys = Set(rows.map { $0.key })
+
+        if keys.count != uniqueKeys.count {
+            let duplicates = Dictionary(grouping: rows, by: \.key)
+                .filter { $1.count > 1 }.keys
+            throw LocalizationError(message: "❌ Check your Google Spreadsheet, you have a duplicate keys: \(duplicates)")
+        }
+    }
+
     /// Displays error to stdout
     private func displayError(_ localizationError: LocalizationError) {
         let message = "❌ " + localizationError.message
