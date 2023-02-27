@@ -82,13 +82,13 @@ final class LocRowTests: XCTestCase {
         XCTAssertEqual(#""pos_arg_key" = "%1$@ people will arrive in %2$@ minutes";"#, locRow.localizableRow)
     }
 
-    func testForDuplicateKeys() throws {
+    func testForDuplicatedKeys() throws {
         let localization = ACKLocalization()
         let locRow = [
             LocRow(key: "key_1", value: "value1"),
             LocRow(key: "key_1", value: "value2"),
             LocRow(key: "key_2", value: "value3")
         ]
-        XCTAssertThrowsError(try localization.checkDuplicateKeys(form: locRow))
+        XCTAssertThrowsError(try localization.checkDuplicatedKeys(form: locRow))
     }
 }
