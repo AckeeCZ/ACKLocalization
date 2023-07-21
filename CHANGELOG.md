@@ -8,6 +8,8 @@
 
 ## master
 
+## 1.6.0
+
 ### Added
 - Add check for duplicate keys in Spreadsheet ([#38](https://github.com/AckeeCZ/ACKLocalization/pull/38), kudos to @AGr-AlexandrGrigoryev)
 - Replaces custom solution for getting auth credentials with [google auth library](https://github.com/googleapis/google-auth-library-swift) ([#36](https://github.com/AckeeCZ/ACKLocalization/pull/36), kudos to @babacros)
