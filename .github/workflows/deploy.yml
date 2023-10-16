@@ -8,10 +8,10 @@ on:
 jobs:
   deploy:
     name: Deploy
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
-      - uses: actions/checkout@v2
-      - uses: AckeeCZ/load-xcode-version@1.0
+      - uses: actions/checkout@v4.1.0
+      - uses: AckeeCZ/load-xcode-version@1.1.0
       - name: Build
         run: swift build --static-swift-stdlib --configuration release
       - name: Get tag name
