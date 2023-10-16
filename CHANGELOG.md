@@ -6,7 +6,9 @@
 - <description> (#<PR_number>, kudos to @<author>)
 ```
 
-## master
+## main
+
+## 1.6.1
 
 ### Fixed
 

@@ -16,12 +16,12 @@ jobs:
         run: swift build --static-swift-stdlib --configuration release
       - name: Get tag name
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
       - name: Archive
         run: | 
           mv "`swift build --show-bin-path --configuration release`/ACKLocalization" .
           zip -r "acklocalization-${{ steps.get_version.outputs.VERSION }}.zip" LICENSE ACKLocalization
-      - uses: xresloader/upload-to-github-release@v1
+      - uses: xresloader/upload-to-github-release@v1.3.12
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
