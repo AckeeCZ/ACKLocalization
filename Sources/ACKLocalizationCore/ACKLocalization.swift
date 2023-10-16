@@ -462,8 +462,7 @@ public final class ACKLocalization {
 extension String {
     func removingSuffix(_ suffix: String) -> String {
         guard hasSuffix(suffix) else { return self }
-        
-        return String(self[...index(endIndex, offsetBy: -suffix.count)])
+        return String(dropLast(suffix.count))
     }
 }
 

@@ -1,4 +1,4 @@
-import ACKLocalizationCore
+@testable import ACKLocalizationCore
 import XCTest
 
 final class ACKLocalizationTests: XCTestCase {
@@ -39,5 +39,10 @@ final class ACKLocalizationTests: XCTestCase {
             LocRow(key: "key_3", value: "value3")
         ]
         XCTAssertNoThrow(try localization.checkDuplicateKeys(form: locRow))
+    }
+
+    func testRemovingSuffix() {
+        var fileName = "Localizable.strings"
+        XCTAssertEqual("Localizable", fileName.removingSuffix(".strings"))
     }
 }

@@ -8,6 +8,10 @@
 
 ## master
 
+### Fixed
+
+- Incorrect file name when specified with _.strings_ suffix ([#39](https://github.com/AckeeCZ/ACKLocalization/pull/39), kudos to @vendulasvastal)
+
 ## 1.6.0
 
 ### Added
