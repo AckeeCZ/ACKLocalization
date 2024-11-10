@@ -1,21 +1,12 @@
-//
-//  ACKLocalization.swift
-//  
-//
-//  Created by Jakub Olejník on 11/12/2019.
-//
-
 import Combine
 import Foundation
+import GoogleAuth
 
 /// Type used for representation of result map values that will be written to destination file
 public typealias MappedValues = [String: [LocRow]]
 
 /// Class containing all `ACKLocalization` logic
 public final class ACKLocalization {
-    /// Auth API used to fetch access token for spreadsheet API
-    private let authAPI: AuthAPIServicing
-    
     /// Spreadsheet API used to fetch spreadsheet content
     private let sheetsAPI: SheetsAPIServicing
     
@@ -23,8 +14,7 @@ public final class ACKLocalization {
     
     // MARK: - Initializers
     
-    public init(authAPI: AuthAPIServicing = AuthAPIService(), sheetsAPI: SheetsAPIServicing = SheetsAPIService()) {
-        self.authAPI = authAPI
+    public init(sheetsAPI: SheetsAPIServicing = SheetsAPIService()) {
         self.sheetsAPI = sheetsAPI
     }
     
@@ -60,10 +50,14 @@ public final class ACKLocalization {
     /// Fetches content of given sheet from spreadsheet using given `serviceAccount`
     ///
     /// If not `spreadsheetTabName` is provided, the first in the spreadsheet is used
-    public func fetchSheetValues(_ spreadsheetTabName: String?, spreadsheetId: String, serviceAccount: Data) -> AnyPublisher<ValueRange, LocalizationError> {
+    public func fetchSheetValues(
+        _ spreadsheetTabName: String?,
+        spreadsheetId: String,
+        serviceAccountPath: String?
+    ) -> AnyPublisher<ValueRange, LocalizationError> {
         let sheetsAPI = self.sheetsAPI
-        
-        return authAPI.fetchAccessToken(serviceAccount: serviceAccount)
+
+        return fetchGoogleAccessToken(serviceAccountPath: serviceAccountPath)
             .handleEvents(receiveOutput: { sheetsAPI.credentials = $0 })
             .map { _ in }
             .flatMap { sheetsAPI.fetchSpreadsheet(spreadsheetId) }
@@ -71,7 +65,7 @@ public final class ACKLocalization {
             .mapError(LocalizationError.init)
             .eraseToAnyPublisher()
     }
-    
+
     public func fetchSheetValues(_ spreadsheetTabName: String?, spreadsheetId: String, apiKey: APIKey) -> AnyPublisher<ValueRange, LocalizationError> {
         let sheetsAPI = self.sheetsAPI
         sheetsAPI.credentials = apiKey
@@ -323,52 +317,37 @@ public final class ACKLocalization {
     
     /// Fetches sheet values from given `config`
     public func fetchSheetValues(_ config: Configuration) -> AnyPublisher<ValueRange, LocalizationError> {
-        do {
-            if let serviceAccountPath = config.serviceAccount {
-                let serviceAccount = try loadServiceAccount(from: serviceAccountPath)
-                return fetchSheetValues(
-                    config.spreadsheetTabName,
-                    spreadsheetId: config.spreadsheetID,
-                    serviceAccount: serviceAccount
-                )
-            } else if let apiKey = config.apiKey {
-                return fetchSheetValues(
-                    config.spreadsheetTabName,
-                    spreadsheetId: config.spreadsheetID,
-                    apiKey: apiKey
-                )
-            } else if let serviceAccountPath = ProcessInfo.processInfo.environment[Constants.serviceAccountPath] {
-                let serviceAccount = try loadServiceAccount(from: serviceAccountPath)
-                return fetchSheetValues(
-                    config.spreadsheetTabName,
-                    spreadsheetId: config.spreadsheetID,
-                    serviceAccount: serviceAccount
-                )
-            } else if let apiKey = ProcessInfo.processInfo.environment[Constants.apiKey] {
-                let apiKey = APIKey(value: apiKey)
-                return fetchSheetValues(
-                    config.spreadsheetTabName,
-                    spreadsheetId: config.spreadsheetID,
-                    apiKey: apiKey
-                )
-            } else {
-                let errorMessage = """
-                Unable to load API key or service account path. Please check if:
-
-                - `apiKey` or `serviceAccount` attribute is provided in `localization.json` file
-                or
-                - `\(Constants.apiKey)` or `\(Constants.serviceAccountPath)` environment variable is set
-                """
-
-                throw LocalizationError(message: errorMessage)
-            }
-        } catch {
-            switch error {
-            case let localizationError as LocalizationError:
-                return Fail(error: localizationError).eraseToAnyPublisher()
-            default:
-                return Fail(error: LocalizationError(message: error.localizedDescription)).eraseToAnyPublisher()
-            }
+        if let serviceAccountPath = config.serviceAccount {
+            return fetchSheetValues(
+                config.spreadsheetTabName,
+                spreadsheetId: config.spreadsheetID,
+                serviceAccountPath: serviceAccountPath
+            )
+        } else if let apiKey = config.apiKey {
+            return fetchSheetValues(
+                config.spreadsheetTabName,
+                spreadsheetId: config.spreadsheetID,
+                apiKey: apiKey
+            )
+        } else if let serviceAccountPath = ProcessInfo.processInfo.environment[Constants.serviceAccountPath] {
+            return fetchSheetValues(
+                config.spreadsheetTabName,
+                spreadsheetId: config.spreadsheetID,
+                serviceAccountPath: serviceAccountPath
+            )
+        } else if let apiKey = ProcessInfo.processInfo.environment[Constants.apiKey] {
+            let apiKey = APIKey(value: apiKey)
+            return fetchSheetValues(
+                config.spreadsheetTabName,
+                spreadsheetId: config.spreadsheetID,
+                apiKey: apiKey
+            )
+        } else {
+            return fetchSheetValues(
+                config.spreadsheetTabName,
+                spreadsheetId: config.spreadsheetID,
+                serviceAccountPath: nil
+            )
         }
     }
     
@@ -394,19 +373,6 @@ public final class ACKLocalization {
                 throw LocalizationError(message: "Unable to read `localization.json` - " + error.localizedDescription)
             }
         }
-    }
-    
-    /// Loads service account from given `config`
-    private func loadServiceAccount(from path: String) throws -> Data {
-        guard let serviceAccountData = FileManager.default.contents(atPath: path) else {
-            throw LocalizationError(message: "Unable to load service account at " + path)
-        }
-
-        guard !serviceAccountData.isEmpty else {
-            throw LocalizationError(message: "Invalid service account data")
-        }
-        
-        return serviceAccountData
     }
     
     /// Actually writes given `rows` to given `file`
@@ -456,6 +422,35 @@ public final class ACKLocalization {
             }
             exit(1)
         }
+    }
+
+    private func fetchGoogleAccessToken(serviceAccountPath: String?) -> AnyPublisher<Token, RequestError> {
+        Future { promise in
+            Task {
+                do {
+                    let tokenProvider: TokenProvider
+                    let scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+
+                    if let serviceAccountPath {
+                        tokenProvider = try await ServiceAccountTokenProvider(
+                            serviceAccountPath: serviceAccountPath,
+                            scopes: scopes
+                        )
+                    } else if let tp = await DefaultCredentialsTokenProvider(scopes: scopes) {
+                        tokenProvider = tp
+                    } else {
+                        throw RequestError(message: "Unable to instantiate token provider")
+                    }
+
+                    let token = try await tokenProvider.token()
+                    promise(.success(token))
+                } catch let error as TokenProviderError {
+                    promise(.failure(RequestError(underlyingError: error)))
+                } catch let error as RequestError {
+                    promise(.failure(error))
+                }
+            }
+        }.eraseToAnyPublisher()
     }
 }
 
