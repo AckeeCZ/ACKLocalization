@@ -8,12 +8,11 @@ on:
 jobs:
   deploy:
     name: Deploy
-    runs-on: macos-13
+    runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4.1.0
-      - uses: AckeeCZ/load-xcode-version@1.1.0
+      - uses: actions/checkout@v4
       - name: Build
-        run: swift build --static-swift-stdlib --configuration release
+        run: swift build --configuration release
       - name: Get tag name
         id: get_version
         run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
@@ -21,7 +20,7 @@ jobs:
         run: | 
           mv "`swift build --show-bin-path --configuration release`/ACKLocalization" .
           zip -r "acklocalization-${{ steps.get_version.outputs.VERSION }}.zip" LICENSE ACKLocalization
-      - uses: xresloader/upload-to-github-release@v1.3.12
+      - uses: xresloader/upload-to-github-release@v1.6.0
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
