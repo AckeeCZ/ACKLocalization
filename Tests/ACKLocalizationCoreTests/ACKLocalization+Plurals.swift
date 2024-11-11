@@ -3,17 +3,15 @@ import XCTest
 
 final class ACKLocalizationPluralsTests: XCTestCase {
     private var ackLocalization: ACKLocalization!
-    private var authAPI: AuthAPIServiceMock!
     private var sheetsAPI: SheetsAPIServiceMock!
     
     // MARK: - Setup
     
     override func setUp() {
         super.setUp()
-        
-        authAPI = AuthAPIServiceMock()
+
         sheetsAPI = SheetsAPIServiceMock()
-        ackLocalization = ACKLocalization(authAPI: authAPI, sheetsAPI: sheetsAPI)
+        ackLocalization = ACKLocalization(sheetsAPI: sheetsAPI)
     }
     
     // MARK: - Tests
