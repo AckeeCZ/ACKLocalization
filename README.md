@@ -14,9 +14,24 @@ AckeeCZ/ACKLocalization
 
 ## Usage
 
-You can use ACKLocalization in two ways:
-1. safer and recommended [use with Service Account](#use-with-service-account)
-2. [use with API key](#use-with-api-key)
+You can use ACKLocalization in three ways:
+1. [application default credentials](#application-default-credentials)
+2. safer and recommended [use with Service Account](#use-with-service-account)
+3. [use with API key](#use-with-api-key)
+
+### Application default credentials (ADC)
+
+For authorization to Google Spreadsheet we recommend using [Application default credentials](https://cloud.google.com/docs/authentication/application-default-credentials). This way you can safely authorize locally using your personal Google account and use a service account in CI environment.
+
+To setup application default credentials you need to install gcloud CLI utility and run
+
+```
+gcloud auth application-default login --billing-project <project_id> --scopes https://www.googleapis.com/auth/spreadsheets.readonly,https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/sqlservice.login,https://www.googleapis.com/auth/userinfo.email,openid
+```
+
+You need to add additional scope `https://www.googleapis.com/auth/spreadsheets.readonly` that will allow your ADC to read spreadsheet API on your behalf.
+
+As Spreadsheet API is [Client-based](https://cloud.google.com/docs/quotas/quota-project#project-client-based) you need to provide a quota project. Spreadsheet API is free so you do not need to worry about that. The project just needs to have Spreadsheet API enabled.
 
 ### Use with Service Account
 
