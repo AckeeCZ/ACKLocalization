@@ -7,4 +7,3 @@ extension Token: CredentialsType {
         add(to: &request)
     }
 }
-
