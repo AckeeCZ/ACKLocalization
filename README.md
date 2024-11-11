@@ -1,6 +1,4 @@
 ![Tests](https://github.com/AckeeCZ/ACKLocalization/workflows/Tests/badge.svg)
-[![Version](https://img.shields.io/cocoapods/v/ACKLocalization.svg?style=flat)](http://cocoapods.org/pods/ACKLocalization)
-[![License](https://img.shields.io/cocoapods/l/ACKLocalization.svg?style=flat)](http://cocoapods.org/pods/ACKLocalization)
 
 # ACKLocalization
 
@@ -8,22 +6,11 @@ Simply localize your app with translations stored in Google Spreadsheet.
 
 ## Installation
 
-### Cocoapods
+Preferred installation method is using [Mint](https://github.com/yonaskolb/Mint), just add it to your Mintfile
 
-1. Add **ACKLocalization** to your Podfile
-
-```ruby
-pod 'ACKLocalization`
 ```
-
-2. Install pods
-```bash
-pod install
+AckeeCZ/ACKLocalization
 ```
-
-### Manually
-
-Just download binary from Github release
 
 ## Usage
 
@@ -107,10 +94,6 @@ If both are provided then `ACKLOCALIZATION_SERVICE_ACCOUNT_PATH` will be used.
 
 Just call the binary, remember that the configuration file has to be in the same directory where you call ACKLocalization.
 
-```bash
-Pods/ACKLocalization/Localization
-```
-
 ### Example
 
 We love to call **ACKLocalization** from Xcode (we have a separate aggregate target which calls the script) so I'll stick with that with this example.
@@ -120,7 +103,6 @@ We love to call **ACKLocalization** from Xcode (we have a separate aggregate tar
 This is example folder structure of the project
 ```
 |-localization.json
-|-Podfile
 |-Project.xcodeproj
 |-ServiceAccount.json
 |-App
