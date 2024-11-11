@@ -18,7 +18,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/olejnjak/google-auth-swift",
-            from: "0.1.0"
+            from: "0.1.1"
         ),
     ],
     targets: [
@@ -31,7 +31,7 @@ let package = Package(
                 ),
             ]
         ),
-        .target(
+        .executableTarget(
             name: "ACKLocalization",
             dependencies: ["ACKLocalizationCore"]),
         .testTarget(
