@@ -1,6 +1,4 @@
 ![Tests](https://github.com/AckeeCZ/ACKLocalization/workflows/Tests/badge.svg)
-[![Version](https://img.shields.io/cocoapods/v/ACKLocalization.svg?style=flat)](http://cocoapods.org/pods/ACKLocalization)
-[![License](https://img.shields.io/cocoapods/l/ACKLocalization.svg?style=flat)](http://cocoapods.org/pods/ACKLocalization)
 
 # ACKLocalization
 
@@ -8,28 +6,32 @@ Simply localize your app with translations stored in Google Spreadsheet.
 
 ## Installation
 
-### Cocoapods
+Preferred installation method is using [Mint](https://github.com/yonaskolb/Mint), just add it to your Mintfile
 
-1. Add **ACKLocalization** to your Podfile
-
-```ruby
-pod 'ACKLocalization`
 ```
-
-2. Install pods
-```bash
-pod install
+AckeeCZ/ACKLocalization
 ```
-
-### Manually
-
-Just download binary from Github release
 
 ## Usage
 
-You can use ACKLocalization in two ways:
-1. safer and recommended [use with Service Account](#use-with-service-account)
-2. [use with API key](#use-with-api-key)
+You can use ACKLocalization in three ways:
+1. [application default credentials](#application-default-credentials)
+2. safer and recommended [use with Service Account](#use-with-service-account)
+3. [use with API key](#use-with-api-key)
+
+### Application default credentials (ADC)
+
+For authorization to Google Spreadsheet we recommend using [Application default credentials](https://cloud.google.com/docs/authentication/application-default-credentials). This way you can safely authorize locally using your personal Google account and use a service account in CI environment.
+
+To setup application default credentials you need to install gcloud CLI utility and run
+
+```
+gcloud auth application-default login --billing-project <project_id> --scopes https://www.googleapis.com/auth/spreadsheets.readonly,https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/sqlservice.login,https://www.googleapis.com/auth/userinfo.email,openid
+```
+
+You need to add additional scope `https://www.googleapis.com/auth/spreadsheets.readonly` that will allow your ADC to read spreadsheet API on your behalf.
+
+As Spreadsheet API is [Client-based](https://cloud.google.com/docs/quotas/quota-project#project-client-based) you need to provide a quota project. Spreadsheet API is free so you do not need to worry about that. The project just needs to have Spreadsheet API enabled.
 
 ### Use with Service Account
 
@@ -107,10 +109,6 @@ If both are provided then `ACKLOCALIZATION_SERVICE_ACCOUNT_PATH` will be used.
 
 Just call the binary, remember that the configuration file has to be in the same directory where you call ACKLocalization.
 
-```bash
-Pods/ACKLocalization/Localization
-```
-
 ### Example
 
 We love to call **ACKLocalization** from Xcode (we have a separate aggregate target which calls the script) so I'll stick with that with this example.
@@ -120,7 +118,6 @@ We love to call **ACKLocalization** from Xcode (we have a separate aggregate tar
 This is example folder structure of the project
 ```
 |-localization.json
-|-Podfile
 |-Project.xcodeproj
 |-ServiceAccount.json
 |-App

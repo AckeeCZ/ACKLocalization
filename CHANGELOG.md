@@ -8,6 +8,9 @@
 
 ## main
 
+### Added 
+- Add support for [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) ([#42](https://github.com/AckeeCZ/ACKLocalization/pull/42), kudos to @olejnjak)
+
 ## 1.6.1
 
 ### Fixed

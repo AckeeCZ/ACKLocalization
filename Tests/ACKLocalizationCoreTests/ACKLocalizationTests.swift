@@ -42,7 +42,7 @@ final class ACKLocalizationTests: XCTestCase {
     }
 
     func testRemovingSuffix() {
-        var fileName = "Localizable.strings"
+        let fileName = "Localizable.strings"
         XCTAssertEqual("Localizable", fileName.removingSuffix(".strings"))
     }
 }

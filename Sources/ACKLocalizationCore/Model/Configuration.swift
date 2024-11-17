@@ -66,7 +66,7 @@ public typealias Configuration = ConfigurationV2
 public struct ConfigurationV2: Decodable {
     /// API key that will be used to comunicate with Google Sheets API
     ///
-    /// Either `apiKey` or `serviceAccount` must be provided, if both are provided, then `serviceAccount` will be used
+    /// If `apiKey` nor `serviceAccount` is provided [Application default credentials](https://cloud.google.com/docs/authentication/application-default-credentials#personal) would be used
     public let apiKey: APIKey?
     
     /// Path to destination directory where generated strings files should be saved
@@ -80,7 +80,7 @@ public struct ConfigurationV2: Decodable {
     
     /// Path to service account file that will be used to access spreadsheet
     ///
-    /// Either `apiKey` or `serviceAccount` must be provided, if both are provided, then `serviceAccount` will be used
+    /// If `apiKey` nor `serviceAccount` is provided [Application default credentials](https://cloud.google.com/docs/authentication/application-default-credentials#personal) would be used
     public let serviceAccount: String?
     
     /// Identifier of spreadsheet that should be downloaded
