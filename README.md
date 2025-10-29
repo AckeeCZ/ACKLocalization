@@ -15,7 +15,7 @@ AckeeCZ/ACKLocalization
 ## Usage
 
 You can use ACKLocalization in three ways:
-1. [application default credentials](#application-default-credentials)
+1. [application default credentials](#application-default-credentials-adc)
 2. safer and recommended [use with Service Account](#use-with-service-account)
 3. [use with API key](#use-with-api-key)
 
