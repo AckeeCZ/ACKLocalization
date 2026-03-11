@@ -45,4 +45,36 @@ final class ACKLocalizationTests: XCTestCase {
         let fileName = "Localizable.strings"
         XCTAssertEqual("Localizable", fileName.removingSuffix(".strings"))
     }
+
+    func test_valueRange_decodesIntegerCellValues() throws {
+        let json = #"{"values":[["key","en"],["some_key",42]]}"#
+        let valueRange = try JSONDecoder().decode(ValueRange.self, from: Data(json.utf8))
+        XCTAssertEqual(valueRange.values, [["key", "en"], ["some_key", "42"]])
+    }
+
+    func test_valueRange_decodesDoubleCellValues() throws {
+        let json = #"{"values":[["key","en"],["price_key",3.14]]}"#
+        let valueRange = try JSONDecoder().decode(ValueRange.self, from: Data(json.utf8))
+        XCTAssertEqual(valueRange.values, [["key", "en"], ["price_key", "3.14"]])
+    }
+
+    func test_valueRange_decodesMixedCellValues() throws {
+        let json = #"{"values":[["key","en"],["str_key","hello"],["int_key",7]]}"#
+        let valueRange = try JSONDecoder().decode(ValueRange.self, from: Data(json.utf8))
+        XCTAssertEqual(valueRange.values, [["key", "en"], ["str_key", "hello"], ["int_key", "7"]])
+    }
+
+    func test_transform_integerCellValue() throws {
+        let json = #"{"values":[["keys","en"],["count",42]]}"#
+        let valueRange = try JSONDecoder().decode(ValueRange.self, from: Data(json.utf8))
+        let mappedValues = try localization.transformValues(
+            valueRange,
+            with: ["en": "en"],
+            keyColumnName: "keys"
+        )
+        XCTAssertEqual(
+            mappedValues["en"],
+            [LocRow(key: "count", value: "42")]
+        )
+    }
 }
