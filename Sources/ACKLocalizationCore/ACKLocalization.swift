@@ -9,13 +9,22 @@ public typealias MappedValues = [String: [LocRow]]
 public final class ACKLocalization {
     /// Spreadsheet API used to fetch spreadsheet content
     private let sheetsAPI: SheetsAPIServicing
-    
+
+    /// Filesystem abstraction for writing output files
+    private let fileSystem: FileSystem
+
     private var fetchCancellable: Cancellable?
-    
+
     // MARK: - Initializers
-    
+
     public init(sheetsAPI: SheetsAPIServicing = SheetsAPIService()) {
         self.sheetsAPI = sheetsAPI
+        self.fileSystem = DefaultFileSystem()
+    }
+
+    init(sheetsAPI: SheetsAPIServicing, fileSystem: FileSystem) {
+        self.sheetsAPI = sheetsAPI
+        self.fileSystem = fileSystem
     }
     
     // MARK: - Public interface
@@ -250,7 +259,7 @@ public final class ACKLocalization {
             let dirPath = ((path as NSString).expandingTildeInPath as NSString)
                 .appendingPathComponent(fileRows.language + ".lproj")
             
-            try? FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true)
+            try? fileSystem.createDirectory(atPath: dirPath, withIntermediateDirectories: true)
             
             // Collection of plural rules for a given translation key.
             // Translation key is the base without the suffix ##{plural-rule}
@@ -270,7 +279,7 @@ public final class ACKLocalization {
                 let encoder = PropertyListEncoder()
                 encoder.outputFormat = .xml
                 let data = try encoder.encode(plurals)
-                try data.write(to: URL(fileURLWithPath: stringsDictPath))
+                try fileSystem.writeData(data, to: URL(fileURLWithPath: stringsDictPath))
             }
         }
     }
@@ -381,9 +390,12 @@ public final class ACKLocalization {
 
         try checkDuplicateKeys(form: rows)
 
-        try rows.map { $0.localizableRow }
-            .joined(separator: "\n")
-            .write(toFile: file, atomically: true, encoding: .utf8)
+        try fileSystem.writeString(
+            rows.map { $0.localizableRow }.joined(separator: "\n"),
+            toFile: file,
+            atomically: true,
+            encoding: .utf8
+        )
     }
 
     /// Check if given `rows` have a duplicated keys

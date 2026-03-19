@@ -6,22 +6,18 @@ import Testing
 struct SaveMappedValuesTests {
     private let localization: ACKLocalization
     private let sheetsAPI: SheetsAPIServiceMock
+    private let fileSystem: FileSystemMock
 
     init() {
         sheetsAPI = SheetsAPIServiceMock()
-        localization = ACKLocalization(sheetsAPI: sheetsAPI)
+        fileSystem = FileSystemMock()
+        localization = ACKLocalization(sheetsAPI: sheetsAPI, fileSystem: fileSystem)
     }
 
     // MARK: - File writing
 
     @Test
     func writesStringsFile() throws {
-        let tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        defer { try? FileManager.default.removeItem(at: tempDir) }
-
-        let destPath = tempDir.path
-
         let mappedValues: MappedValues = [
             "en": [
                 LocRow(key: "greeting", value: "Hello"),
@@ -32,27 +28,20 @@ struct SaveMappedValuesTests {
         try localization.saveMappedValues(
             mappedValues,
             defaultFileName: "Localizable",
-            destinations: ["Localizable": destPath]
+            destinations: ["Localizable": "/output"]
         )
 
-        let stringsPath = tempDir
-            .appendingPathComponent("en.lproj")
-            .appendingPathComponent("Localizable.strings")
-            .path
+        let stringsPath = "/output/en.lproj/Localizable.strings"
 
-        #expect(FileManager.default.fileExists(atPath: stringsPath))
+        #expect(fileSystem.writtenStrings[stringsPath] != nil)
 
-        let content = try String(contentsOfFile: stringsPath, encoding: .utf8)
+        let content = fileSystem.writtenStrings[stringsPath]!
         #expect(content.contains(#""greeting" = "Hello";"#))
         #expect(content.contains(#""farewell" = "Goodbye";"#))
     }
 
     @Test
     func createsLprojDirectories() throws {
-        let tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        defer { try? FileManager.default.removeItem(at: tempDir) }
-
         let mappedValues: MappedValues = [
             "en": [LocRow(key: "key", value: "en_value")],
             "cs": [LocRow(key: "key", value: "cs_value")]
@@ -61,22 +50,15 @@ struct SaveMappedValuesTests {
         try localization.saveMappedValues(
             mappedValues,
             defaultFileName: "Localizable",
-            destinations: ["Localizable": tempDir.path]
+            destinations: ["Localizable": "/output"]
         )
 
-        let enDir = tempDir.appendingPathComponent("en.lproj").path
-        let csDir = tempDir.appendingPathComponent("cs.lproj").path
-
-        #expect(FileManager.default.fileExists(atPath: enDir))
-        #expect(FileManager.default.fileExists(atPath: csDir))
+        #expect(fileSystem.createdDirectories.contains("/output/en.lproj"))
+        #expect(fileSystem.createdDirectories.contains("/output/cs.lproj"))
     }
 
     @Test
     func writesStringsDictForPlurals() throws {
-        let tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        defer { try? FileManager.default.removeItem(at: tempDir) }
-
         let mappedValues: MappedValues = [
             "en": [
                 LocRow(key: "items##{one}", value: "%d item"),
@@ -87,31 +69,19 @@ struct SaveMappedValuesTests {
         try localization.saveMappedValues(
             mappedValues,
             defaultFileName: "Localizable",
-            destinations: ["Localizable": tempDir.path]
+            destinations: ["Localizable": "/output"]
         )
 
-        let stringsDictPath = tempDir
-            .appendingPathComponent("en.lproj")
-            .appendingPathComponent("Localizable.stringsdict")
-            .path
+        let stringsDictPath = "/output/en.lproj/Localizable.stringsdict"
+        let stringsPath = "/output/en.lproj/Localizable.strings"
 
-        #expect(FileManager.default.fileExists(atPath: stringsDictPath))
-
+        #expect(fileSystem.writtenData[stringsDictPath] != nil)
         // .strings should NOT exist since all rows are plurals
-        let stringsPath = tempDir
-            .appendingPathComponent("en.lproj")
-            .appendingPathComponent("Localizable.strings")
-            .path
-
-        #expect(!FileManager.default.fileExists(atPath: stringsPath))
+        #expect(fileSystem.writtenStrings[stringsPath] == nil)
     }
 
     @Test
     func separatesPluralsFromRegularKeys() throws {
-        let tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        defer { try? FileManager.default.removeItem(at: tempDir) }
-
         let mappedValues: MappedValues = [
             "en": [
                 LocRow(key: "greeting", value: "Hello"),
@@ -123,22 +93,16 @@ struct SaveMappedValuesTests {
         try localization.saveMappedValues(
             mappedValues,
             defaultFileName: "Localizable",
-            destinations: ["Localizable": tempDir.path]
+            destinations: ["Localizable": "/output"]
         )
 
-        let stringsPath = tempDir
-            .appendingPathComponent("en.lproj")
-            .appendingPathComponent("Localizable.strings")
-            .path
-        let stringsDictPath = tempDir
-            .appendingPathComponent("en.lproj")
-            .appendingPathComponent("Localizable.stringsdict")
-            .path
+        let stringsPath = "/output/en.lproj/Localizable.strings"
+        let stringsDictPath = "/output/en.lproj/Localizable.stringsdict"
 
-        #expect(FileManager.default.fileExists(atPath: stringsPath))
-        #expect(FileManager.default.fileExists(atPath: stringsDictPath))
+        #expect(fileSystem.writtenStrings[stringsPath] != nil)
+        #expect(fileSystem.writtenData[stringsDictPath] != nil)
 
-        let stringsContent = try String(contentsOfFile: stringsPath, encoding: .utf8)
+        let stringsContent = fileSystem.writtenStrings[stringsPath]!
         #expect(stringsContent.contains(#""greeting" = "Hello";"#))
         #expect(!stringsContent.contains("items"))
     }
@@ -147,10 +111,6 @@ struct SaveMappedValuesTests {
 
     @Test
     func plistPrefixRoutesToSeparateFile() throws {
-        let tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        defer { try? FileManager.default.removeItem(at: tempDir) }
-
         let mappedValues: MappedValues = [
             "en": [
                 LocRow(key: "greeting", value: "Hello"),
@@ -162,36 +122,26 @@ struct SaveMappedValuesTests {
             mappedValues,
             defaultFileName: "Localizable",
             destinations: [
-                "Localizable": tempDir.path,
-                "InfoPlist": tempDir.path
+                "Localizable": "/output",
+                "InfoPlist": "/output"
             ]
         )
 
-        let localizablePath = tempDir
-            .appendingPathComponent("en.lproj")
-            .appendingPathComponent("Localizable.strings")
-            .path
-        let infoPlistPath = tempDir
-            .appendingPathComponent("en.lproj")
-            .appendingPathComponent("InfoPlist.strings")
-            .path
+        let localizablePath = "/output/en.lproj/Localizable.strings"
+        let infoPlistPath = "/output/en.lproj/InfoPlist.strings"
 
-        #expect(FileManager.default.fileExists(atPath: localizablePath))
-        #expect(FileManager.default.fileExists(atPath: infoPlistPath))
+        #expect(fileSystem.writtenStrings[localizablePath] != nil)
+        #expect(fileSystem.writtenStrings[infoPlistPath] != nil)
 
-        let localizableContent = try String(contentsOfFile: localizablePath, encoding: .utf8)
+        let localizableContent = fileSystem.writtenStrings[localizablePath]!
         #expect(localizableContent.contains(#""greeting" = "Hello";"#))
 
-        let infoPlistContent = try String(contentsOfFile: infoPlistPath, encoding: .utf8)
+        let infoPlistContent = fileSystem.writtenStrings[infoPlistPath]!
         #expect(infoPlistContent.contains(#""CFBundleDisplayName" = "My App";"#))
     }
 
     @Test
     func plistPrefixStripsKeyPrefix() throws {
-        let tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        defer { try? FileManager.default.removeItem(at: tempDir) }
-
         let mappedValues: MappedValues = [
             "en": [
                 LocRow(key: "plist.InfoPlist.NSCameraUsageDescription", value: "Camera needed")
@@ -202,17 +152,14 @@ struct SaveMappedValuesTests {
             mappedValues,
             defaultFileName: "Localizable",
             destinations: [
-                "Localizable": tempDir.path,
-                "InfoPlist": tempDir.path
+                "Localizable": "/output",
+                "InfoPlist": "/output"
             ]
         )
 
-        let infoPlistPath = tempDir
-            .appendingPathComponent("en.lproj")
-            .appendingPathComponent("InfoPlist.strings")
-            .path
+        let infoPlistPath = "/output/en.lproj/InfoPlist.strings"
 
-        let content = try String(contentsOfFile: infoPlistPath, encoding: .utf8)
+        let content = fileSystem.writtenStrings[infoPlistPath]!
         // The key should be "NSCameraUsageDescription", not "plist.InfoPlist.NSCameraUsageDescription"
         #expect(content.contains(#""NSCameraUsageDescription" = "Camera needed";"#))
         #expect(!content.contains("plist.InfoPlist"))
@@ -222,10 +169,6 @@ struct SaveMappedValuesTests {
 
     @Test
     func defaultFileNameStripsStringsSuffix() throws {
-        let tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        defer { try? FileManager.default.removeItem(at: tempDir) }
-
         let mappedValues: MappedValues = [
             "en": [LocRow(key: "key", value: "value")]
         ]
@@ -233,25 +176,17 @@ struct SaveMappedValuesTests {
         try localization.saveMappedValues(
             mappedValues,
             defaultFileName: "Localizable.strings",
-            destinations: ["Localizable": tempDir.path]
+            destinations: ["Localizable": "/output"]
         )
 
-        let stringsPath = tempDir
-            .appendingPathComponent("en.lproj")
-            .appendingPathComponent("Localizable.strings")
-            .path
-
-        #expect(FileManager.default.fileExists(atPath: stringsPath))
+        let stringsPath = "/output/en.lproj/Localizable.strings"
+        #expect(fileSystem.writtenStrings[stringsPath] != nil)
     }
 
     // MARK: - Duplicate keys
 
     @Test
     func duplicateKeysThrowsOnSave() throws {
-        let tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        defer { try? FileManager.default.removeItem(at: tempDir) }
-
         let mappedValues: MappedValues = [
             "en": [
                 LocRow(key: "key", value: "value1"),
@@ -263,7 +198,7 @@ struct SaveMappedValuesTests {
             try localization.saveMappedValues(
                 mappedValues,
                 defaultFileName: "Localizable",
-                destinations: ["Localizable": tempDir.path]
+                destinations: ["Localizable": "/output"]
             )
         }
     }
@@ -272,15 +207,11 @@ struct SaveMappedValuesTests {
 
     @Test
     func emptyMappedValuesDoesNotThrow() throws {
-        let tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        defer { try? FileManager.default.removeItem(at: tempDir) }
-
         #expect(throws: Never.self) {
             try localization.saveMappedValues(
                 [:],
                 defaultFileName: "Localizable",
-                destinations: ["Localizable": tempDir.path]
+                destinations: ["Localizable": "/output"]
             )
         }
     }
