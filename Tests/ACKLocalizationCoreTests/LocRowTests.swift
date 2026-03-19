@@ -98,4 +98,78 @@ struct LocRowTests {
         let locRow = LocRow(key: "pos_arg_key", value: "%1$@ people will arrive in %2$@ minutes")
         #expect(#""pos_arg_key" = "%1$@ people will arrive in %2$@ minutes";"# == locRow.localizableRow)
     }
+
+    // MARK: - Multiple format specifiers
+
+    @Test
+    func multipleIntegerSpecifiers() {
+        let locRow = LocRow(key: "key", value: "%d of %d items")
+        #expect(#""key" = "%d of %d items";"# == locRow.localizableRow)
+    }
+
+    @Test
+    func mixedSpecifiers() {
+        let locRow = LocRow(key: "key", value: "%d items for %@")
+        #expect(#""key" = "%d items for %@";"# == locRow.localizableRow)
+    }
+
+    // MARK: - Unicode escape
+
+    @Test
+    func unicodeEscapeIsConverted() {
+        let locRow = LocRow(key: "key", value: "\\u0041")
+        #expect(#""key" = "\U0041";"# == locRow.localizableRow)
+    }
+
+    // MARK: - Edge cases
+
+    @Test
+    func emptyKeyAndValue() {
+        let locRow = LocRow(key: "", value: "")
+        #expect(#""" = "";"# == locRow.localizableRow)
+    }
+
+    @Test
+    func valueIsOnlyPercent() {
+        let locRow = LocRow(key: "key", value: "%")
+        #expect(#""key" = "%%";"# == locRow.localizableRow)
+    }
+
+    @Test
+    func multipleNewlinesEscaped() {
+        let locRow = LocRow(key: "key", value: "line1\nline2\nline3")
+        #expect(#""key" = "line1\nline2\nline3";"# == locRow.localizableRow)
+    }
+
+    @Test
+    func quotesInBothKeyAndValue() {
+        let locRow = LocRow(key: #"say "hi""#, value: #"she said "hello""#)
+        #expect(#""say \"hi\"" = "she said \"hello\"";"# == locRow.localizableRow)
+    }
+
+    @Test
+    func percentAfterCocoaString() {
+        let locRow = LocRow(key: "key", value: "%@ 100%")
+        #expect(#""key" = "%@ 100%%";"# == locRow.localizableRow)
+    }
+
+    // MARK: - isPlural
+
+    @Test
+    func isPluralForRegularKey() {
+        let locRow = LocRow(key: "regular_key", value: "value")
+        #expect(!locRow.isPlural)
+    }
+
+    @Test
+    func isPluralForPluralKey() {
+        let locRow = LocRow(key: "items_count##{one}", value: "one item")
+        #expect(locRow.isPlural)
+    }
+
+    @Test
+    func isPluralForDottedPluralKey() {
+        let locRow = LocRow(key: "section.items_count##{other}", value: "items")
+        #expect(locRow.isPlural)
+    }
 }

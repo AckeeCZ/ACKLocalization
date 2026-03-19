@@ -153,6 +153,70 @@ struct ACKLocalizationPluralsTests {
         // Then
         #expect(encodedData == expectedResultEncoded)
     }
+
+    // MARK: - Partial plural rules
+
+    @Test
+    func partialPluralRules() throws {
+        let rows = [
+            LocRow(key: "items##{one}", value: "one item"),
+            LocRow(key: "items##{other}", value: "%d items")
+        ]
+
+        let plurals = try ackLocalization.buildPlurals(from: rows)
+
+        #expect(plurals.count == 1)
+        #expect(plurals["items"]?.translations.count == 2)
+    }
+
+    @Test
+    func allSixPluralRules() throws {
+        let rows = [
+            LocRow(key: "k##{zero}", value: "zero"),
+            LocRow(key: "k##{one}", value: "one"),
+            LocRow(key: "k##{two}", value: "two"),
+            LocRow(key: "k##{few}", value: "few"),
+            LocRow(key: "k##{many}", value: "many"),
+            LocRow(key: "k##{other}", value: "other")
+        ]
+
+        let plurals = try ackLocalization.buildPlurals(from: rows)
+
+        #expect(plurals.count == 1)
+        #expect(plurals["k"]?.translations.count == 6)
+    }
+
+    // MARK: - Mixed plural and non-plural rows
+
+    @Test
+    func mixedPluralAndNonPluralRows() throws {
+        let rows = [
+            LocRow(key: "regular_key", value: "regular"),
+            LocRow(key: "plural_key##{one}", value: "one"),
+            LocRow(key: "plural_key##{other}", value: "other"),
+            LocRow(key: "another_regular", value: "another")
+        ]
+
+        let plurals = try ackLocalization.buildPlurals(from: rows)
+
+        #expect(plurals.count == 1)
+        #expect(plurals["plural_key"]?.translations.count == 2)
+    }
+
+    // MARK: - Dotted plural keys
+
+    @Test
+    func dottedPluralKey() throws {
+        let rows = [
+            LocRow(key: "section.count##{one}", value: "one"),
+            LocRow(key: "section.count##{other}", value: "other")
+        ]
+
+        let plurals = try ackLocalization.buildPlurals(from: rows)
+
+        #expect(plurals.count == 1)
+        #expect(plurals["section.count"]?.translations.count == 2)
+    }
 }
 
 // Well we used JSONSerialization for comparison of dict literal with expected Codable data,
