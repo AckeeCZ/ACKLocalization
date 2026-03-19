@@ -1,10 +1,12 @@
 @testable import ACKLocalizationCore
-import XCTest
+import Testing
 
-final class ACKLocalizationTests: XCTestCase {
+@Suite
+struct ACKLocalizationTests {
     let localization = ACKLocalization()
 
-    func test_transform_emptyRow() throws {
+    @Test
+    func transformEmptyRow() throws {
         let mappedValues = try localization.transformValues(
             .init(
                 values: [
@@ -15,35 +17,42 @@ final class ACKLocalizationTests: XCTestCase {
             with: ["cs": "cs"],
             keyColumnName: "keys"
         )
-        
-        XCTAssertEqual(Array(mappedValues.keys), ["cs"])
-        XCTAssertEqual(
-            mappedValues.values.flatMap { $0 },
-            [LocRow(key: "key", value: "")]
+
+        #expect(Array(mappedValues.keys) == ["cs"])
+        #expect(
+            mappedValues.values.flatMap { $0 }
+            == [LocRow(key: "key", value: "")]
         )
     }
 
-    func testForDuplicateKeys() throws {
+    @Test
+    func forDuplicateKeys() throws {
         let locRow = [
             LocRow(key: "key_1", value: "value1"),
             LocRow(key: "key_1", value: "value2"),
             LocRow(key: "key_2", value: "value3")
         ]
-        XCTAssertThrowsError(try localization.checkDuplicateKeys(form: locRow))
+        #expect(throws: (any Error).self) {
+            try localization.checkDuplicateKeys(form: locRow)
+        }
     }
 
-    func testForUniqueKeys() throws {
+    @Test
+    func forUniqueKeys() throws {
         let locRow = [
             LocRow(key: "key_1", value: "value1"),
             LocRow(key: "key_2", value: "value2"),
             LocRow(key: "key_3", value: "value3")
         ]
-        XCTAssertNoThrow(try localization.checkDuplicateKeys(form: locRow))
+        #expect(throws: Never.self) {
+            try localization.checkDuplicateKeys(form: locRow)
+        }
     }
 
-    func testRemovingSuffix() {
+    @Test
+    func removingSuffix() {
         let fileName = "Localizable.strings"
-        XCTAssertEqual("Localizable", fileName.removingSuffix(".strings"))
+        #expect("Localizable" == fileName.removingSuffix(".strings"))
     }
 
     func test_valueRange_decodesIntegerCellValues() throws {
