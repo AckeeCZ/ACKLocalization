@@ -15,13 +15,13 @@ public protocol SheetsAPIServicing: AnyObject {
     /// Fetch information about given spreadsheet
     ///
     /// Uses `accessToken` property for authorization
-    func fetchSpreadsheet(_ identifier: String) async throws -> Spreadsheet
+    func fetchSpreadsheet(_ identifier: String) async throws(RequestError) -> Spreadsheet
 
     /// Fetch content of given sheet from given spreadsheet
     ///
     /// If no `sheetName` is provided we use the first sheet
     /// Uses `accessToken` property for authorization
-    func fetchSheet(_ sheetName: String?, from spreadsheet: Spreadsheet) async throws -> ValueRange
+    func fetchSheet(_ sheetName: String?, from spreadsheet: Spreadsheet) async throws(RequestError) -> ValueRange
 }
 
 /// Service that fetches information about spreadsheet
@@ -40,26 +40,34 @@ public final class SheetsAPIService: SheetsAPIServicing {
 
     // MARK: - API calls
 
-    public func fetchSpreadsheet(_ identifier: String) async throws -> Spreadsheet {
+    public func fetchSpreadsheet(_ identifier: String) async throws(RequestError) -> Spreadsheet {
         let url = URL(string: "https://sheets.googleapis.com/v4/spreadsheets/" + identifier)!
         var request = URLRequest(url: url)
         credentials?.addToRequest(&request)
 
-        let (data, response) = try await session.data(for: request)
-        let validData = try Self.validate(data: data, response: response)
-        return try JSONDecoder().decode(Spreadsheet.self, from: validData)
+        do {
+            let (data, response) = try await session.data(for: request)
+            let validData = try Self.validate(data: data, response: response)
+            return try JSONDecoder().decode(Spreadsheet.self, from: validData)
+        } catch {
+            throw RequestError(underlyingError: error)
+        }
     }
 
-    public func fetchSheet(_ sheetName: String?, from spreadsheet: Spreadsheet) async throws -> ValueRange {
+    public func fetchSheet(_ sheetName: String?, from spreadsheet: Spreadsheet) async throws(RequestError) -> ValueRange {
         let sheetName = sheetName ?? spreadsheet.sheets.first?.properties.title ?? ""
         var urlComponents = URLComponents(string: "https://sheets.googleapis.com/v4/spreadsheets/" + spreadsheet.spreadsheetId + "/values/" + sheetName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)!
         urlComponents.queryItems = [URLQueryItem(name: "valueRenderOption", value: "UNFORMATTED_VALUE")]
         var request = URLRequest(url: urlComponents.url!)
         credentials?.addToRequest(&request)
 
-        let (data, response) = try await session.data(for: request)
-        let validData = try Self.validate(data: data, response: response)
-        return try JSONDecoder().decode(ValueRange.self, from: validData)
+        do {
+            let (data, response) = try await session.data(for: request)
+            let validData = try Self.validate(data: data, response: response)
+            return try JSONDecoder().decode(ValueRange.self, from: validData)
+        } catch {
+            throw RequestError(underlyingError: error)
+        }
     }
 
     // MARK: - Private helpers
