@@ -1,10 +1,3 @@
-//
-//  PluralRuleWrapper.swift
-//  
-//
-//  Created by Lukáš Hromadník on 07/07/2020.
-//
-
 import Foundation
 
 /// Custom wrapper around plural rule to have nice way how to create the stringsDict

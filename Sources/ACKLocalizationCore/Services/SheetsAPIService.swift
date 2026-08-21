@@ -1,10 +1,3 @@
-//
-//  SheetsAPIService.swift
-//
-//
-//  Created by Jakub Olejník on 11/12/2019.
-//
-
 import Foundation
 
 /// Protocol wrapping service that fetches information about spreadsheet

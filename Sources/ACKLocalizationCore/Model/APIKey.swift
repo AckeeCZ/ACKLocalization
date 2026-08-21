@@ -1,10 +1,3 @@
-//
-//  APIKey.swift
-//  
-//
-//  Created by Jakub Olejník on 16/12/2019.
-//
-
 import Foundation
 
 /// Struct that is used to represent Google API key
