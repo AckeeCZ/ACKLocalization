@@ -8,7 +8,7 @@
 import Foundation
 
 /// Protocol wrapping service that fetches information about spreadsheet
-public protocol SheetsAPIServicing: AnyObject {
+public protocol SheetsAPIService: AnyObject {
     /// Access token that will be used with all requests
     var credentials: CredentialsType? { get set }
 
@@ -25,7 +25,7 @@ public protocol SheetsAPIServicing: AnyObject {
 }
 
 /// Service that fetches information about spreadsheet
-public final class SheetsAPIService: SheetsAPIServicing {
+public final class SheetsAPIServiceImpl: SheetsAPIService {
     /// Access token that will be used with all requests
     public var credentials: CredentialsType?
 

@@ -7,19 +7,19 @@ public typealias MappedValues = [String: [LocRow]]
 /// Class containing all `ACKLocalization` logic
 public final class ACKLocalization {
     /// Spreadsheet API used to fetch spreadsheet content
-    private let sheetsAPI: SheetsAPIServicing
+    private let sheetsAPI: SheetsAPIService
 
     /// Filesystem abstraction for writing output files
     private let fileSystem: FileSystem
 
     // MARK: - Initializers
 
-    public init(sheetsAPI: SheetsAPIServicing = SheetsAPIService()) {
+    public init(sheetsAPI: SheetsAPIService = SheetsAPIServiceImpl()) {
         self.sheetsAPI = sheetsAPI
-        self.fileSystem = DefaultFileSystem()
+        self.fileSystem = FileSystemImpl()
     }
 
-    init(sheetsAPI: SheetsAPIServicing, fileSystem: FileSystem) {
+    init(sheetsAPI: SheetsAPIService, fileSystem: FileSystem) {
         self.sheetsAPI = sheetsAPI
         self.fileSystem = fileSystem
     }

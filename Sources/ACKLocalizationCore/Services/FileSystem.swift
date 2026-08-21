@@ -13,7 +13,7 @@ protocol FileSystem {
 }
 
 /// Default implementation that delegates to real filesystem APIs
-struct DefaultFileSystem: FileSystem {
+struct FileSystemImpl: FileSystem {
 
     func createDirectory(atPath path: String, withIntermediateDirectories: Bool) throws {
         try FileManager.default.createDirectory(

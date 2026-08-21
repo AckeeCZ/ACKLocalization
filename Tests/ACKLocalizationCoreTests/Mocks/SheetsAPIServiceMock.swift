@@ -7,7 +7,7 @@
 
 import ACKLocalizationCore
 
-final class SheetsAPIServiceMock: SheetsAPIServicing {
+final class SheetsAPIServiceMock: SheetsAPIService {
     var credentials: CredentialsType?
 
     func fetchSpreadsheet(_ identifier: String) async throws(RequestError) -> Spreadsheet {
