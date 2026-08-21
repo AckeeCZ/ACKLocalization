@@ -14,7 +14,7 @@ public final class ACKLocalization {
 
     // MARK: - Initializers
 
-    public init(sheetsAPI: SheetsAPIService = SheetsAPIServiceImpl()) {
+    public init(sheetsAPI: SheetsAPIService = createSheetsAPIService()) {
         self.sheetsAPI = sheetsAPI
         self.fileSystem = FileSystemImpl()
     }
