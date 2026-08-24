@@ -1,10 +1,3 @@
-//
-//  PluralRuleKey.swift
-//  
-//
-//  Created by Lukáš Hromadník on 07/07/2020.
-//
-
 import Foundation
 
 /// Enumeration of all possible plural rule keys

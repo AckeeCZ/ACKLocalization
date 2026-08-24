@@ -8,6 +8,10 @@
 
 ## main
 
+### Changed
+- Replace internal Combine usage with async/await ([#47](https://github.com/AckeeCZ/ACKLocalization/pull/47), kudos to @olejnjak)
+- Migrate tests to Swift Testing and extend test coverage ([#47](https://github.com/AckeeCZ/ACKLocalization/pull/47), kudos to @olejnjak)
+
 ## 1.7.0
 
 ### Added 

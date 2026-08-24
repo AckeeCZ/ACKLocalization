@@ -1,10 +1,3 @@
-//
-//  LocalizationError.swift
-//  
-//
-//  Created by Jakub Olejník on 12/12/2019.
-//
-
 import Foundation
 
 /// Error that is thrown throughout the whole tool

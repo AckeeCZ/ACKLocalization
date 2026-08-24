@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Read",
+      "Bash(swift build*)",
+      "Bash(swift test*)",
+      "Bash(swift run*)",
+      "Bash(swift package*)",
+      "Bash(git add *)",
+      "Bash(git checkout *)",
+      "Bash(git commit *)",
+      "Bash(git rev-parse *)",
+      "Bash(git stash *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git branch*)",
+      "Bash(git blame*)",
+      "Bash(git push*)",
+      "mcp__xcode__BuildProject",
+      "mcp__xcode__GetBuildLog",
+      "mcp__xcode__GetTestList",
+      "mcp__xcode__RunAllTests",
+      "mcp__xcode__RunSomeTests",
+      "mcp__xcode__DocumentationSearch",
+      "mcp__xcode__XcodeRead",
+      "mcp__xcode__XcodeGrep",
+      "mcp__xcode__XcodeGlob",
+      "mcp__xcode__XcodeLS",
+      "mcp__xcode__XcodeListNavigatorIssues",
+      "mcp__xcode__XcodeRefreshCodeIssuesInFile",
+      "WebFetch(domain:anthropic.com)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * --force*)",
+      "Bash(git push * -f)",
+      "Bash(git push * -f *)",
+      "Bash(git push --force-with-lease*)",
+      "Bash(git push * --force-with-lease*)",
+      "Bash(git push origin --delete*)",
+      "Bash(git push * --delete*)",
+      "Bash(git branch -d*)",
+      "Bash(git branch -D*)",
+      "Bash(git branch * -d*)",
+      "Bash(git branch * -D*)"
+    ],
+    "ask": [
+      "Edit(.claude/settings.json)"
+    ]
+  },
+  "enabledPlugins": {
+    "swift-concurrency@swift-concurrency-agent-skill": true,
+    "swift-lsp@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "swift-concurrency-agent-skill": {
+      "source": {
+        "source": "github",
+        "repo": "AvdLee/Swift-Concurrency-Agent-Skill"
+      }
+    }
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "network": {
+      "allowedDomains": [
+        "github.com",
+        "*.github.com",
+        "*.githubusercontent.com",
+        "*.swift.org",
+        "*.apple.com"
+      ]
+    },
+    "excludedCommands": [
+      "git *",
+      "swift *",
+      "xcodebuild *",
+      "xcrun *"
+    ],
+    "filesystem": {
+      "allowWrite": [
+        "~/Library/Caches/org.swift.swiftpm",
+        "~/Library/org.swift.swiftpm",
+        "~/Library/Developer/Xcode/DerivedData"
+      ],
+      "denyRead": [
+        "~/.bash_history",
+        "~/.bash_profile",
+        "~/.bashrc",
+        "~/.profile",
+        "~/.ssh",
+        "~/.zprofile",
+        "~/.zsh_history",
+        "~/.zshrc"
+      ]
+    }
+  },
+  "plansDirectory": "./.claude/plans"
+}

@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by Jakub Olejník on 16/12/2019.
-//
-
 import Foundation
 
 /// Protocol which wraps all possible credentials used in this tool

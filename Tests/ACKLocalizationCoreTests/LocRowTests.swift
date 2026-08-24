@@ -1,84 +1,175 @@
-import XCTest
+import Testing
 @testable import ACKLocalizationCore
 
-final class LocRowTests: XCTestCase {
-    func testBasicRow() {
+@Suite
+struct LocRowTests {
+    @Test
+    func basicRow() {
         let locRow = LocRow(key: "key", value: "value")
-        XCTAssertEqual(#""key" = "value";"#, locRow.localizableRow)
+        #expect(#""key" = "value";"# == locRow.localizableRow)
     }
-    
-    func testIntegerRow() {
+
+    @Test
+    func integerRow() {
         let locRow = LocRow(key: "int_key", value: "int value %d")
-        XCTAssertEqual(#""int_key" = "int value %d";"#, locRow.localizableRow)
+        #expect(#""int_key" = "int value %d";"# == locRow.localizableRow)
     }
-    
-    func testAlternativeIntegerRow() {
+
+    @Test
+    func alternativeIntegerRow() {
         let locRow = LocRow(key: "int_key", value: "int value %i")
-        XCTAssertEqual(#""int_key" = "int value %i";"#, locRow.localizableRow)
+        #expect(#""int_key" = "int value %i";"# == locRow.localizableRow)
     }
-    
-    func testFloatRow() {
+
+    @Test
+    func floatRow() {
         let locRow = LocRow(key: "float_key", value: "float value %f")
-        XCTAssertEqual(#""float_key" = "float value %f";"#, locRow.localizableRow)
+        #expect(#""float_key" = "float value %f";"# == locRow.localizableRow)
     }
-    
-    func testOneDecimalFloatRow() {
+
+    @Test
+    func oneDecimalFloatRow() {
         let locRow = LocRow(key: "float_key", value: "float value with one decimal %.1f")
-        XCTAssertEqual(#""float_key" = "float value with one decimal %.1f";"#, locRow.localizableRow)
+        #expect(#""float_key" = "float value with one decimal %.1f";"# == locRow.localizableRow)
     }
-    
-    func testThreeDecimalFloatRow() {
+
+    @Test
+    func threeDecimalFloatRow() {
         let locRow = LocRow(key: "float_key", value: "float value with three decimals %.3f")
-        XCTAssertEqual(#""float_key" = "float value with three decimals %.3f";"#, locRow.localizableRow)
+        #expect(#""float_key" = "float value with three decimals %.3f";"# == locRow.localizableRow)
     }
-    
-    func testStringRow() {
+
+    @Test
+    func stringRow() {
         let locRow = LocRow(key: "string_key", value: "string value %s")
-        XCTAssertEqual(#""string_key" = "string value %@";"#, locRow.localizableRow)
+        #expect(#""string_key" = "string value %@";"# == locRow.localizableRow)
     }
-    
-    func testCocoaStringRow() {
+
+    @Test
+    func cocoaStringRow() {
         let locRow = LocRow(key: "string_key", value: "string value %@")
-        XCTAssertEqual(#""string_key" = "string value %@";"#, locRow.localizableRow)
+        #expect(#""string_key" = "string value %@";"# == locRow.localizableRow)
     }
-    
-    func testPercentIsEscaped() {
+
+    @Test
+    func percentIsEscaped() {
         let locRow = LocRow(key: "percent_key", value: "%d % percent")
-        XCTAssertEqual(#""percent_key" = "%d %% percent";"#, locRow.localizableRow)
+        #expect(#""percent_key" = "%d %% percent";"# == locRow.localizableRow)
     }
-    
-    func testKeyQuotesAreEscaped() {
+
+    @Test
+    func keyQuotesAreEscaped() {
         let locRow = LocRow(key: "abc\"abc", value: "quotes_value")
-        XCTAssertEqual(#""abc\"abc" = "quotes_value";"#, locRow.localizableRow)
+        #expect(#""abc\"abc" = "quotes_value";"# == locRow.localizableRow)
     }
-    
-    func testValueQuotesAreEscaped() {
+
+    @Test
+    func valueQuotesAreEscaped() {
         let locRow = LocRow(key: "quotes_key", value: "abc\"abc")
-        XCTAssertEqual(#""quotes_key" = "abc\"abc";"#, locRow.localizableRow)
+        #expect(#""quotes_key" = "abc\"abc";"# == locRow.localizableRow)
     }
-    
-    func testNewLineIsEscaped() {
+
+    @Test
+    func newLineIsEscaped() {
         let locRow = LocRow(key: "nl_key", value: "abc\nabc")
-        XCTAssertEqual(#""nl_key" = "abc\nabc";"#, locRow.localizableRow)
+        #expect(#""nl_key" = "abc\nabc";"# == locRow.localizableRow)
     }
-    
-    func testIntPositionArgumentsAreReplaced() {
+
+    @Test
+    func intPositionArgumentsAreReplaced() {
         let locRow = LocRow(key: "pos_arg_key", value: "%1$d people will arrive in %2$d minutes")
-        XCTAssertEqual(#""pos_arg_key" = "%1$d people will arrive in %2$d minutes";"#, locRow.localizableRow)
+        #expect(#""pos_arg_key" = "%1$d people will arrive in %2$d minutes";"# == locRow.localizableRow)
     }
-    
-    func testFloatPositionArgumentsAreReplaced() {
+
+    @Test
+    func floatPositionArgumentsAreReplaced() {
         let locRow = LocRow(key: "pos_arg_key", value: "%1$f people will arrive in %2$f minutes")
-        XCTAssertEqual(#""pos_arg_key" = "%1$f people will arrive in %2$f minutes";"#, locRow.localizableRow)
+        #expect(#""pos_arg_key" = "%1$f people will arrive in %2$f minutes";"# == locRow.localizableRow)
     }
-    
-    func testStringPositionArgumentsAreReplaced() {
+
+    @Test
+    func stringPositionArgumentsAreReplaced() {
         let locRow = LocRow(key: "pos_arg_key", value: "%1$s people will arrive in %2$s minutes")
-        XCTAssertEqual(#""pos_arg_key" = "%1$@ people will arrive in %2$@ minutes";"#, locRow.localizableRow)
+        #expect(#""pos_arg_key" = "%1$@ people will arrive in %2$@ minutes";"# == locRow.localizableRow)
     }
-    
-    func testCocoaStringPositionArgumentsAreReplaced() {
+
+    @Test
+    func cocoaStringPositionArgumentsAreReplaced() {
         let locRow = LocRow(key: "pos_arg_key", value: "%1$@ people will arrive in %2$@ minutes")
-        XCTAssertEqual(#""pos_arg_key" = "%1$@ people will arrive in %2$@ minutes";"#, locRow.localizableRow)
+        #expect(#""pos_arg_key" = "%1$@ people will arrive in %2$@ minutes";"# == locRow.localizableRow)
+    }
+
+    // MARK: - Multiple format specifiers
+
+    @Test
+    func multipleIntegerSpecifiers() {
+        let locRow = LocRow(key: "key", value: "%d of %d items")
+        #expect(#""key" = "%d of %d items";"# == locRow.localizableRow)
+    }
+
+    @Test
+    func mixedSpecifiers() {
+        let locRow = LocRow(key: "key", value: "%d items for %@")
+        #expect(#""key" = "%d items for %@";"# == locRow.localizableRow)
+    }
+
+    // MARK: - Unicode escape
+
+    @Test
+    func unicodeEscapeIsConverted() {
+        let locRow = LocRow(key: "key", value: "\\u0041")
+        #expect(#""key" = "\U0041";"# == locRow.localizableRow)
+    }
+
+    // MARK: - Edge cases
+
+    @Test
+    func emptyKeyAndValue() {
+        let locRow = LocRow(key: "", value: "")
+        #expect(#""" = "";"# == locRow.localizableRow)
+    }
+
+    @Test
+    func valueIsOnlyPercent() {
+        let locRow = LocRow(key: "key", value: "%")
+        #expect(#""key" = "%%";"# == locRow.localizableRow)
+    }
+
+    @Test
+    func multipleNewlinesEscaped() {
+        let locRow = LocRow(key: "key", value: "line1\nline2\nline3")
+        #expect(#""key" = "line1\nline2\nline3";"# == locRow.localizableRow)
+    }
+
+    @Test
+    func quotesInBothKeyAndValue() {
+        let locRow = LocRow(key: #"say "hi""#, value: #"she said "hello""#)
+        #expect(#""say \"hi\"" = "she said \"hello\"";"# == locRow.localizableRow)
+    }
+
+    @Test
+    func percentAfterCocoaString() {
+        let locRow = LocRow(key: "key", value: "%@ 100%")
+        #expect(#""key" = "%@ 100%%";"# == locRow.localizableRow)
+    }
+
+    // MARK: - isPlural
+
+    @Test
+    func isPluralForRegularKey() {
+        let locRow = LocRow(key: "regular_key", value: "value")
+        #expect(!locRow.isPlural)
+    }
+
+    @Test
+    func isPluralForPluralKey() {
+        let locRow = LocRow(key: "items_count##{one}", value: "one item")
+        #expect(locRow.isPlural)
+    }
+
+    @Test
+    func isPluralForDottedPluralKey() {
+        let locRow = LocRow(key: "section.items_count##{other}", value: "items")
+        #expect(locRow.isPlural)
     }
 }
