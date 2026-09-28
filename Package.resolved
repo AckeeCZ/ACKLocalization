@@ -1,5 +1,5 @@
 {
-  "originHash" : "f6844888ec22893d862a6d50b01a09ebc625f4e3501a03169b6156668ab7e9fa",
+  "originHash" : "284993b03ec469775bc02b18c34a7995014bd5748ca9f0f36c6e5f85a5a2e875",
   "pins" : [
     {
       "identity" : "google-auth-swift",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "02a0fa600eee1bdc892013d62fc795fc623a5cc3",
         "version" : "5.1.0"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "6a52f3251125d74daf04fcbd5e6f08a75d074382",
+        "version" : "1.8.2"
       }
     },
     {

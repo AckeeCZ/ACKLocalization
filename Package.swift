@@ -11,6 +11,9 @@ let package = Package(
         .library(
             name: "ACKLocalizationCore",
             targets: ["ACKLocalizationCore"]),
+        .library(
+            name: "ACKLocalizationCommands",
+            targets: ["ACKLocalizationCommands"]),
         .executable(
             name: "ACKLocalization",
             targets: ["ACKLocalization"]),
@@ -19,6 +22,10 @@ let package = Package(
         .package(
             url: "https://github.com/olejnjak/google-auth-swift",
             from: "0.1.1"
+        ),
+        .package(
+            url: "https://github.com/apple/swift-argument-parser",
+            from: "1.8.2"
         ),
     ],
     targets: [
@@ -31,9 +38,19 @@ let package = Package(
                 ),
             ]
         ),
+        .target(
+            name: "ACKLocalizationCommands",
+            dependencies: [
+                "ACKLocalizationCore",
+                .product(
+                    name: "ArgumentParser",
+                    package: "swift-argument-parser"
+                ),
+            ]
+        ),
         .executableTarget(
             name: "ACKLocalization",
-            dependencies: ["ACKLocalizationCore"]),
+            dependencies: ["ACKLocalizationCommands"]),
         .testTarget(
             name: "ACKLocalizationCoreTests",
             dependencies: ["ACKLocalizationCore"]),
