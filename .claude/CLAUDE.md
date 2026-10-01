@@ -17,10 +17,11 @@ Tests use **Swift Testing** (`@Test`/`#expect`), not XCTest.
 
 ## Architecture
 
-Two targets with a thin executable wrapper:
+Two library targets with a thin executable wrapper:
 
-- `Sources/ACKLocalization/main.swift` — executable; just instantiates `ACKLocalization` and calls `run()`.
-- `Sources/ACKLocalizationCore` — all logic, exposed as a library so it is testable.
+- `Sources/ACKLocalization` — executable; only marks `ACKLocalizationCommand` as `@main`.
+- `Sources/ACKLocalizationCommands` — library with the public `ACKLocalizationCommand` (swift-argument-parser `AsyncParsableCommand`, command name `localization`) that instantiates `ACKLocalization` and runs it; exposed so other tools can embed it (e.g. as a subcommand).
+- `Sources/ACKLocalizationCore` — all logic, exposed as a library so it is testable; does not depend on ArgumentParser.
 
 The pipeline lives in `ACKLocalizationCore/ACKLocalization.swift` and runs: load `localization.json` (`Model/Configuration.swift`, with fallback decoding of the legacy `ConfigurationV1` format) → resolve credentials (config values take priority over the `ACKLOCALIZATION_SERVICE_ACCOUNT_PATH` / `ACKLOCALIZATION_API_KEY` env vars, service account over API key, ADC as last resort) → fetch spreadsheet via `SheetsAPIService` → `transformValues` maps sheet columns to languages via `languageMapping` → `saveMappedValues` groups rows per output file (keys prefixed `plist.<FileName>.` go to `<FileName>.strings`, plural keys `key##{rule}` go to `.stringsdict`) and writes via `FileSystem`.
 

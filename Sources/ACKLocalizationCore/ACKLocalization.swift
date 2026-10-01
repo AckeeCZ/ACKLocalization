@@ -27,16 +27,18 @@ public final class ACKLocalization {
     // MARK: - Public interface
 
     /// Main that loads configuration from _localization.json_, fetches access token and loads content of spreadsheet
-    public func run() async {
+    ///
+    /// Errors are displayed before being rethrown
+    public func run() async throws {
         do {
             let config = try loadConfiguration()
             try await run(configuration: config)
         } catch let error as LocalizationError {
             displayError(error)
-            exit(1)
+            throw error
         } catch {
             print(error)
-            exit(1)
+            throw error
         }
     }
 

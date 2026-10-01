@@ -9,6 +9,8 @@
 ## main
 
 ### Changed
+- Use [Swift Argument Parser](https://github.com/apple/swift-argument-parser) for command-line handling, the command is available as `ACKLocalizationCommand` in the new `ACKLocalizationCommands` library so it can be embedded in other tools ([#48](https://github.com/AckeeCZ/ACKLocalization/pull/48), kudos to @olejnjak)
+- `ACKLocalization.run()` no longer calls `exit(1)` on failure, it displays the error and rethrows it instead ([#48](https://github.com/AckeeCZ/ACKLocalization/pull/48), kudos to @olejnjak)
 - Replace internal Combine usage with async/await ([#47](https://github.com/AckeeCZ/ACKLocalization/pull/47), kudos to @olejnjak)
 - Migrate tests to Swift Testing and extend test coverage ([#47](https://github.com/AckeeCZ/ACKLocalization/pull/47), kudos to @olejnjak)
 
